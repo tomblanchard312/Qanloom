@@ -335,7 +335,7 @@ pub fn chat_file(path: &str, messages: &[Message], params: &Params, cancel: &Ato
     #[cfg(not(unix))]
     {
         let _ = (params, on_chunk, size, sha256, license);
-        return Err(Error::Unsupported);
+        Err(Error::Unsupported)
     }
     #[cfg(unix)]
     {
