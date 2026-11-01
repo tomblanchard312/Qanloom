@@ -605,6 +605,11 @@ fn a_dragged_shape_leaves_the_text_behind_it() {
     h.step(); // the preview is painted a frame after the move
     assert!(h.state().canvas.obj_drag.as_ref().is_some_and(|d| d.drag.moved), "a drag is in progress");
     let (tl, br) = (at(&mut h, o.rect.x, o.rect.y + down), at(&mut h, o.rect.right(), o.rect.bottom() + down));
+    if !crate::tests::gpu_available() {
+        button(&h, end, false);
+        steps(&mut h, 3);
+        return;
+    }
     let img = h.render().unwrap();
     let ppp = h.ctx.pixels_per_point();
     // Pixels in a screen area, but for the mouse pointer drawn at `end`.
@@ -812,23 +817,26 @@ fn rotation_drag_turns_picture_pixels_live_and_commits_once_or_cancels() {
         let texture = d.preview.as_ref().expect("cached picture preview").id();
         assert_eq!(serde_json::to_value(&h.state().session.doc).unwrap(), original, "dragging must not edit the document");
         assert_eq!(h.state().session.undo_depth(), depth);
-        let rendered = h.render().unwrap();
-        if initial == 0.0
-            && let Ok(path) = std::env::var("WORDCRAFT_ROTATION_SHOT")
-        {
-            rendered.save(path).unwrap();
-        }
-        let ppp = h.ctx.pixels_per_point();
-        let spin = wordcraft_geom::Spin::new(target, flip_h, flip_v);
-        for ((x, y), colour) in [(-75.0, -20.0), (75.0, -20.0), (75.0, 20.0), (-75.0, 20.0)].into_iter().zip(colours) {
-            let (x, y) = spin.apply(cx, cy, cx + x, cy + y);
-            let at = crate::canvas::page_to_screen(h.state_mut(), 0, x, y).unwrap();
-            let pixel = rendered.get_pixel((at.x * ppp).round() as u32, (at.y * ppp).round() as u32).0;
-            for (actual, expected) in pixel.into_iter().zip(colour).take(3) {
-                if expected > 150 {
-                    assert!(actual > 170, "live quadrant missing: {initial}/{flip_h}/{flip_v} {colour:?} -> {pixel:?}");
-                } else {
-                    assert!(actual < 150, "live quadrant missing: {initial}/{flip_h}/{flip_v} {colour:?} -> {pixel:?}");
+        // Pixel checks need a GPU; every other assertion runs everywhere.
+        if crate::tests::gpu_available() {
+            let rendered = h.render().unwrap();
+            if initial == 0.0
+                && let Ok(path) = std::env::var("WORDCRAFT_ROTATION_SHOT")
+            {
+                rendered.save(path).unwrap();
+            }
+            let ppp = h.ctx.pixels_per_point();
+            let spin = wordcraft_geom::Spin::new(target, flip_h, flip_v);
+            for ((x, y), colour) in [(-75.0, -20.0), (75.0, -20.0), (75.0, 20.0), (-75.0, 20.0)].into_iter().zip(colours) {
+                let (x, y) = spin.apply(cx, cy, cx + x, cy + y);
+                let at = crate::canvas::page_to_screen(h.state_mut(), 0, x, y).unwrap();
+                let pixel = rendered.get_pixel((at.x * ppp).round() as u32, (at.y * ppp).round() as u32).0;
+                for (actual, expected) in pixel.into_iter().zip(colour).take(3) {
+                    if expected > 150 {
+                        assert!(actual > 170, "live quadrant missing: {initial}/{flip_h}/{flip_v} {colour:?} -> {pixel:?}");
+                    } else {
+                        assert!(actual < 150, "live quadrant missing: {initial}/{flip_h}/{flip_v} {colour:?} -> {pixel:?}");
+                    }
                 }
             }
         }
