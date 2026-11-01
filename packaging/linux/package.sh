@@ -9,8 +9,10 @@
 #
 # Usage: packaging/linux/package.sh [--skip-build] [--formats "appimage deb rpm tar"]
 #
-# The package also carries Enki (sharedai-daemon, sharedai-worker, sharedai-sd). Installing it
-# puts that Enki in /usr/lib/enki when it is missing or newer than the one already there.
+# The .deb depends on enki-runtime, the device's single shared Enki in /usr/lib/enki, and
+# carries no Enki of its own. The .rpm, AppImage, tarball and Flatpak still carry Enki
+# (sharedai-daemon, sharedai-worker, sharedai-sd); the .rpm installs it in /usr/lib/enki
+# when it is missing or newer, until an enki-runtime RPM exists.
 # Set ENKI_ROOT if the Enki checkout is not the sibling ../Enki directory. ENKI_BIN_DIR
 # skips rebuilding Enki and uses that directory of binaries instead.
 #
@@ -78,7 +80,7 @@ cp -R "$ROOT/assets/app-icon/hicolor" "$STAGE/usr/share/icons/"
 mkdir -p "$STAGE/usr/share/doc/nisaba"
 copy_docs "$STAGE/usr/share/doc/nisaba"
 if [[ -z "${ENKI_ROOT:-}" && -f "$ROOT/../Enki/packaging/stage-enki.sh" ]]; then
-  ENKI_ROOT=$(CDPATH= cd -- "$ROOT/../Enki" && pwd)
+  ENKI_ROOT=$(CDPATH='' cd -- "$ROOT/../Enki" && pwd)
 fi
 if [[ ! -f "${ENKI_ROOT:-}/packaging/stage-enki.sh" ]]; then
   echo "error: Enki checkout not found. Set ENKI_ROOT so the package can install Enki." >&2
