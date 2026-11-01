@@ -28,6 +28,7 @@ description: |-
 overrides:
   deb:
     depends:
+      - enki-runtime (>= 0.2.0~preview.2)
       - libc6 (>= 2.35)
       - libgcc-s1
       - libxkbcommon0
@@ -63,12 +64,17 @@ contents:
   - src: ${STAGE}/usr/bin/nisaba-cli
     dst: /usr/bin/nisaba-cli
     file_info: { mode: 0755 }
+  # The .deb uses the device's single shared Enki (the enki-runtime package,
+  # /usr/lib/enki) instead of carrying its own copy. The .rpm keeps the bundled
+  # installer until an enki-runtime RPM exists.
   - src: ${STAGE}/usr/bin/nisaba-install-enki
     dst: /usr/bin/nisaba-install-enki
     file_info: { mode: 0755 }
+    packager: rpm
   - src: ${STAGE}/usr/lib/nisaba/
     dst: /usr/lib/nisaba/
     type: tree
+    packager: rpm
   - src: ${STAGE}/usr/share/
     dst: /usr/share/
     type: tree
