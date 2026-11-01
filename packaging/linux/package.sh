@@ -78,7 +78,7 @@ cp -R "$ROOT/assets/app-icon/hicolor" "$STAGE/usr/share/icons/"
 mkdir -p "$STAGE/usr/share/doc/nisaba"
 copy_docs "$STAGE/usr/share/doc/nisaba"
 if [[ -z "${ENKI_ROOT:-}" && -f "$ROOT/../Enki/packaging/stage-enki.sh" ]]; then
-  ENKI_ROOT=$(CDPATH= cd -- "$ROOT/../Enki" && pwd)
+  ENKI_ROOT=$(CDPATH='' cd -- "$ROOT/../Enki" && pwd)
 fi
 if [[ ! -f "${ENKI_ROOT:-}/packaging/stage-enki.sh" ]]; then
   echo "error: Enki checkout not found. Set ENKI_ROOT so the package can install Enki." >&2
