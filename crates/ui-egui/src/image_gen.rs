@@ -791,7 +791,10 @@ mod image_progress_tests {
         app.image_gen.cancel = Some(sharedai_client::Cancellation::new());
         tx.send(Outcome::Default { model: sharedai_client::GPU_IMAGE_MODEL_ID.into(), side: 1024, steps: 50 }).unwrap();
         tx.send(Outcome::Step { step: 3, total: 50 }).unwrap();
-        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(760.0, 720.0)).wgpu().build_ui_state(
+        let builder = egui_kittest::Harness::builder().with_size(egui::vec2(760.0, 720.0));
+        // The renderer is only needed for the optional screenshot below.
+        let builder = if crate::tests::gpu_available() { builder.wgpu() } else { builder };
+        let mut h = builder.build_ui_state(
             |ui, app: &mut WordApp| {
                 let ctx = ui.ctx().clone();
                 if let Some(outcome) = poll(&mut app.image_gen, &ctx) {
@@ -807,7 +810,7 @@ mod image_progress_tests {
         assert!(h.state().image_gen.rx.is_some());
         assert!(h.query_by_label("Drawing, step 3 of 50.").is_some());
         assert!(h.query_by_label_contains("Elapsed: 1m").is_some());
-        if let Some(dir) = std::env::var_os("ENKI_IMAGE_UI_SHOTS") {
+        if let Some(dir) = std::env::var_os("ENKI_IMAGE_UI_SHOTS").filter(|_| crate::tests::gpu_available()) {
             h.render().unwrap().save(std::path::PathBuf::from(dir).join("wordcraft-Qanloom.png")).unwrap();
         }
         h.get_by_label("Cancel").click();

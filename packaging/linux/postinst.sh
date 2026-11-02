@@ -1,6 +1,7 @@
 #!/bin/sh
-# deb/rpm post-install and post-remove: install or update the shared Enki, then refresh
-# the desktop, MIME and icon caches. Every cache tool is optional; missing ones are skipped.
+# deb/rpm post-install and post-remove: on rpm, install or update the shared Enki from the
+# bundled payload (the .deb depends on the enki-runtime package instead and ships no
+# payload, so this step is skipped there), then refresh the desktop, MIME and icon caches. Every cache tool is optional; missing ones are skipped.
 # deb passes "configure"; rpm postinstall passes 1 (install) or 2 (upgrade).
 case "${1:-configure}" in
   configure | 1 | 2)

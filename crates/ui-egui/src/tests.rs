@@ -3,6 +3,23 @@ use egui_kittest::kittest::Queryable;
 
 mod perf;
 
+/// Whether this machine can render with wgpu. Minimal CI machines (the FreeBSD VMs) have no
+/// GPU adapter; render tests skip their pixel checks there and report it, and keep every other
+/// assertion. Checked once, the same way egui_kittest creates its renderer, without panicking.
+pub(crate) fn gpu_available() -> bool {
+    static AVAILABLE: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *AVAILABLE.get_or_init(|| {
+        let setup = egui_kittest::wgpu::default_wgpu_setup();
+        let instance = pollster::block_on(setup.new_instance());
+        let config = egui_wgpu::WgpuConfiguration { wgpu_setup: setup, ..Default::default() };
+        let ok = pollster::block_on(egui_wgpu::RenderState::create(&config, &instance, None, Default::default())).is_ok();
+        if !ok {
+            eprintln!("note: no GPU adapter on this machine; render tests skip their pixel checks");
+        }
+        ok
+    })
+}
+
 fn mod_key(key: egui::Key) -> egui::Event {
     egui::Event::Key { key, physical_key: None, pressed: true, repeat: false, modifiers: egui::Modifiers::COMMAND }
 }

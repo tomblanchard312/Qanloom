@@ -92,6 +92,38 @@ fn run_fallback_is_cached_per_char_set() {
     assert!(db.run_fallbacks.read().unwrap().map.is_empty());
 }
 
+/// Whether any font file under `dirs` maps `c`, read directly with skrifa so the answer doesn't
+/// depend on the fallback code being tested. Bounded: at most 20 000 files.
+fn installed_font_covers(dirs: &[std::path::PathBuf], c: char) -> bool {
+    use skrifa::MetadataProvider;
+    let mut stack = dirs.to_vec();
+    let mut seen = 0usize;
+    while let Some(d) = stack.pop() {
+        let Ok(rd) = std::fs::read_dir(&d) else { continue };
+        for e in rd.flatten() {
+            let p = e.path();
+            if p.is_dir() {
+                stack.push(p);
+                continue;
+            }
+            seen += 1;
+            if seen > 20_000 {
+                return false;
+            }
+            let ext = p.extension().and_then(std::ffi::OsStr::to_str).map(str::to_ascii_lowercase);
+            if !matches!(ext.as_deref(), Some("ttf" | "otf" | "ttc" | "otc")) {
+                continue;
+            }
+            let Ok(bytes) = std::fs::read(&p) else { continue };
+            let Ok(file) = skrifa::raw::FileRef::new(&bytes) else { continue };
+            if file.fonts().flatten().any(|f| f.charmap().map(c).is_some()) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 /// The issue's run (#1549): Thai letters and digits, Latin letters, digits and the baht sign.
 const THAI_RUN: &str = "[D] น้ำ ค่ำ ปั้น ฝั่ง ปู่ ๑๒๓๔๕๖๗๘๙๐ ฿1,250.50";
 
@@ -107,8 +139,23 @@ fn a_thai_run_with_latin_uses_available_font_coverage() {
         }
         assert!(f.has_layout_tables(), "{} shapes Thai", f.family);
     } else {
+        // Per character, a fallback is required exactly where an installed font covers it. Minimal
+        // systems (the FreeBSD CI images) have no Thai font: those characters are reported, not
+        // failed, so the test checks the fallback search rather than what the machine has.
+        let mut uncovered = std::collections::BTreeSet::new();
         for c in &chars {
-            assert!(latin.covers(*c) || db.fallback_for(*c, latin.id()).is_some_and(|f| f.covers(*c)), "fallback covers {c}");
+            if latin.covers(*c) {
+                continue;
+            }
+            let found = db.fallback_for(*c, latin.id()).is_some_and(|f| f.covers(*c));
+            if installed_font_covers(&db.font_dirs, *c) {
+                assert!(found, "an installed font covers {c} but no fallback was found");
+            } else if !found {
+                uncovered.insert(*c);
+            }
+        }
+        if !uncovered.is_empty() {
+            eprintln!("note: no installed font covers {uncovered:?}; checked bundled coverage only");
         }
     }
     // Without system fonts and without craft-fonts' Thai face (built in since craft-fonts

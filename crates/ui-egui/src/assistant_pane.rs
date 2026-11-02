@@ -242,10 +242,23 @@ fn spawn(work: Work, f: impl FnOnce(std::sync::mpsc::Sender<Msg>, Arc<AtomicBool
     let (tx, rx) = std::sync::mpsc::channel();
     let cancel = Arc::new(AtomicBool::new(false));
     let c = cancel.clone();
-    std::thread::Builder::new().name("scribe".into()).spawn(move || f(tx, c)).map_err(|e| {
-        log::warn!("assistant: cannot start a worker thread: {e}");
-        unavailable_text()
-    })?;
+    // The interface language is per thread: the worker writes its messages (errors, status) in
+    // the language the UI is drawn in, not the thread default (English).
+    let lang = crate::i18n::current();
+    #[cfg(test)]
+    let pseudo = crate::i18n::pseudo::on();
+    std::thread::Builder::new()
+        .name("scribe".into())
+        .spawn(move || {
+            crate::i18n::set_current(lang);
+            #[cfg(test)]
+            crate::i18n::pseudo::set(pseudo);
+            f(tx, c)
+        })
+        .map_err(|e| {
+            log::warn!("assistant: cannot start a worker thread: {e}");
+            unavailable_text()
+        })?;
     Ok(Job { rx, cancel, work })
 }
 
@@ -729,6 +742,21 @@ mod tests {
 
     fn app(text: &str) -> WordApp {
         WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::from_text(text)), crate::Services::default())
+    }
+    #[test]
+    #[cfg(not(target_arch = "wasm32"))]
+    fn worker_messages_use_the_interface_language() {
+        // The language is per thread; a worker must write in the UI's language, not English.
+        crate::i18n::pseudo::set(true);
+        let job = spawn(Work::Starting, |tx, _| {
+            let _ = tx.send(Msg::Models(Err(unavailable_text())));
+        })
+        .unwrap();
+        let msg = job.rx.recv_timeout(std::time::Duration::from_secs(10));
+        crate::i18n::pseudo::set(false);
+        let Ok(Msg::Models(Err(text))) = msg else { panic!("no message from the worker") };
+        assert!(text.contains('⟦'), "worker text skipped translation: {text}");
+        assert_eq!(crate::i18n::pseudo::unmarked(&text).trim(), "", "{text}");
     }
     #[test]
     fn scribe_keeps_model_selection_out_of_the_pane() {
