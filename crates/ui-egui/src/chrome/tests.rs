@@ -307,3 +307,25 @@ fn clicking_the_autosave_label_toggles_autosave() {
     assert!(h.state().autosaves(), "and clicking it again turns it back on");
     let _ = std::fs::remove_dir_all(dir);
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+#[test]
+fn voice_controls_open_and_reopen_without_recording() {
+    use egui_kittest::kittest::Queryable;
+    let app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::new()), crate::Services::default());
+    let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1440.0, 900.0)).build_ui_state(
+        |ui, app: &mut WordApp| {
+            app.logic(ui.ctx());
+            app.ui(ui);
+        },
+        app,
+    );
+    h.run_steps(4);
+    for _ in 0..2 {
+        h.get_by_label("Voice").click();
+        h.run_steps(2);
+        h.get_by_label("Dictate");
+        h.get_by_label("Voice").click();
+        h.run_steps(2);
+    }
+}

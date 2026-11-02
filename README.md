@@ -94,3 +94,5 @@ the ArtCraft Team, and contains none of the ArtCraft marks.
 The Qanloom icon is original blue-and-gold document-and-stylus artwork. The name is
 inspired by Mesopotamian reed-stylus writing; it is a modern coined name, not a deity.
 Existing icon filenames and operating-system IDs are retained for upgrade compatibility.
+
+Voice accessibility preview: see [dictation, transcription, translation and safe voice controls](docs/VOICE.md).

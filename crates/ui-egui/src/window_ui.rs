@@ -250,6 +250,8 @@ impl WordApp {
             file_browser,
             info_editing,
             shown_document,
+            #[cfg(not(target_arch = "wasm32"))]
+                speech: _,
         } = self;
         let UiState {
             // App-wide: preferences, recent lists, and the settings the session owns while

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-exclude = ["vendor/enki-client", "vendor/enki-protocol"]
+exclude = ["vendor/enki-speech/client", "vendor/enki-speech/protocol", "vendor/enki-speech/speech-ui", "vendor/enki-client", "vendor/enki-protocol"]
 members = ["crates/*", "apps/*", "xtask"]
 default-members = ["crates/*", "apps/wordcraft", "apps/wordcraft-cli", "xtask"]
 

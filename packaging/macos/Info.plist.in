@@ -4,6 +4,8 @@
      @SHORT_VERSION@ (numeric X.Y.Z) and @BUILD_SHA@. -->
 <plist version="1.0">
 <dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Record audio only when you choose Dictate or Voice command for local speech recognition.</string>
   <key>CFBundleDevelopmentRegion</key>
   <string>en</string>
   <key>CFBundleDisplayName</key>

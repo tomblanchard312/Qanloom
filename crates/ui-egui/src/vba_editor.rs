@@ -649,12 +649,14 @@ fn tool(verb: &str, file: &str, bytes: &[u8], cancel: &AtomicBool) -> Result<Str
     };
     static NEXT: AtomicU64 = AtomicU64::new(0);
     let dir = std::env::temp_dir().join(format!("nisaba-vba-{}-{}", std::process::id(), NEXT.fetch_add(1, Ordering::Relaxed)));
-    let mut builder = std::fs::DirBuilder::new();
+    let builder = std::fs::DirBuilder::new();
     #[cfg(unix)]
-    {
+    let builder = {
         use std::os::unix::fs::DirBuilderExt;
+        let mut builder = builder;
         builder.mode(0o700);
-    }
+        builder
+    };
     builder.create(&dir).map_err(|e| e.to_string())?;
     let result = (|| {
         let path = dir.join(file);

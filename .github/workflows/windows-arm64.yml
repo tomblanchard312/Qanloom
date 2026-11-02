@@ -30,6 +30,6 @@ jobs:
     uses: storytold/craft-common-actions/.github/workflows/windows-arm64.yml@main
     with:
       app-name: wordcraft
-      app-dir: WordCraft
-      install-relative-path: Programs/ArtCraft/WordCraft
+      app-dir: Qanloom
+      install-relative-path: Programs/Qanloom
       install-scope: perUser

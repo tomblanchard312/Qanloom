@@ -1,7 +1,7 @@
 {
   "id": "wordcraft",
   "name": "Qanloom",
-  "registryName": "Nisaba",
+  "installDirRegistryKey": "Software\\Nisaba",
   "upgradeCode": "CA023669-1903-46E1-89D2-8A889DBF885E",
   "sources": [
     "wordcraft.wxs"

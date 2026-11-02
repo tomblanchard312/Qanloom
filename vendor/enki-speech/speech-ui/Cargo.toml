@@ -1,0 +1,15 @@
+[package]
+name = "enki-speech-ui"
+version = "0.2.0"
+edition = "2024"
+license = "MIT"
+description = "Optional shared desktop speech controls for Enki consumers"
+
+[dependencies]
+sharedai-client = { version = "=0.2.0", path = "../client" }
+sharedai-protocol = { version = "=0.2.0", path = "../protocol" }
+tokio = { version = "1", features = ["full"] }
+egui = "0.37"
+rfd = { version = "0.17", default-features = false, features = ["xdg-portal"] }
+cpal = "0.16"
+rubato = "0.16"

@@ -96,7 +96,7 @@ pub fn cleaned(reply: &str) -> String {
 }
 
 enum Msg {
-    Models(Result<Vec<String>, String>),
+    Models(Result<Vec<String>, wordcraft_sharedai::Error>),
     Progress(u64),
     Chunk(String),
     Done(Result<String, String>),
@@ -205,7 +205,7 @@ impl State {
                         }
                         Err(e) => {
                             self.unavailable = true;
-                            self.status = e;
+                            self.status = friendly(&e);
                         }
                     }
                     self.job = None;
@@ -345,7 +345,7 @@ fn local_models() -> Result<Vec<String>, wordcraft_sharedai::Error> {
 
 fn refresh_models(app: &mut WordApp) {
     let job = spawn(Work::Starting, move |tx, _| {
-        let r = local_models().map_err(|e| friendly(&e));
+        let r = local_models();
         let _ = tx.send(Msg::Models(r));
     });
     app.assistant.asked_models = true;
@@ -858,6 +858,18 @@ mod tests {
         let models = vec!["/m/a.gguf".into(), "/m/microsoft_Phi-4-mini-instruct-Q4_K_M.gguf".into()];
         assert_eq!(preferred_model(&models).as_deref(), Some("/m/microsoft_Phi-4-mini-instruct-Q4_K_M.gguf"));
         assert_eq!(preferred_model(&["/m/a.gguf".into()]).as_deref(), Some("/m/a.gguf"));
+    }
+
+    #[test]
+    fn discovery_errors_are_translated_on_the_ui_thread() {
+        let (tx, rx) = std::sync::mpsc::channel();
+        let mut state = State { job: Some(Job { rx, cancel: Arc::new(AtomicBool::new(false)), work: Work::Starting }), ..Default::default() };
+        tx.send(Msg::Models(Err(wordcraft_sharedai::Error::NotInstalled))).unwrap();
+        crate::i18n::pseudo::set(true);
+        state.poll("");
+        crate::i18n::pseudo::set(false);
+        assert!(state.unavailable);
+        assert!(state.status.starts_with('⟦'), "{}", state.status);
     }
 
     #[test]

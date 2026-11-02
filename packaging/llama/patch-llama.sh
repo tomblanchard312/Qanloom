@@ -8,11 +8,7 @@ version=$(awk '$0 == "name = \"llama-cpp-sys-2\"" { getline; gsub(/version = |"/
 [ -n "$version" ] || exit 0
 
 cargo fetch --locked --manifest-path "$root/Cargo.toml" >/dev/null
-src=
-for candidate in "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/"llama-cpp-sys-2-$version"; do
-    if [ -d "$candidate" ]; then src=$candidate; break; fi
-done
-[ -n "$src" ] || { echo "llama-cpp-sys-2-$version is missing from the Cargo registry" >&2; exit 1; }
+src=$(find "${CARGO_HOME:-$HOME/.cargo}/registry/src" -mindepth 2 -maxdepth 2 -type d -name "llama-cpp-sys-2-$version" -print -quit)
 dest="$root/target/llama-cpp-sys-2-freebsd"
 rm -rf "$dest"
 mkdir -p "$root/target"

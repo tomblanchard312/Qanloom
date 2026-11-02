@@ -376,6 +376,8 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                     if scribe.on_hover_text(wordcraft_brand::ASSISTANT_NAME).clicked() {
                         let _ = app.run("view.assistantPane", json!({"value": !app.session.view.assistant_pane}));
                     }
+                    #[cfg(not(target_arch = "wasm32"))]
+                    app.speech.button(ui, tl!("Voice"));
                     search_box(app, ui, control_h);
                     right_start = ui.min_rect().min.x;
                 });

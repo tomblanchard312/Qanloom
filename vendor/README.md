@@ -7,7 +7,8 @@ image/protocol changes not yet published there). No daemon or inference implemen
 is copied. The package manifests use explicit versions instead of inheriting Enki's
 workspace, and the protocol path points to this snapshot.
 
-Both packages retain Enki's existing `UNLICENSED` designation. Qanloom's MIT/Apache
-licenses do not relicense this snapshot. No license grant is introduced by this copy.
+Both shared SDK packages are MIT-licensed by explicit owner approval, with the grant recorded in their package LICENSE files. This does not change the daemon or inference implementation licenses.
 Keep these files in sync with an explicitly reviewed Enki client revision; a clean clone
 must not depend on an unpublished sibling checkout.
+
+The owner has approved MIT licensing for these shared SDK packages. Their package manifests and included LICENSE files now record that grant; the daemon and native workers remain outside this snapshot and retain their existing terms.

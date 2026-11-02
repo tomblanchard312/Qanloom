@@ -82,6 +82,8 @@ impl WordApp {
             alt_modifier_seen,
         } = window_ui::WindowUi::new(session.document_id());
         WordApp {
+            #[cfg(not(target_arch = "wasm32"))]
+            speech: enki_speech_ui::SpeechTools::new("qanloom"),
             session,
             ui: UiState {
                 tab,
@@ -442,6 +444,8 @@ impl WordApp {
         if !moved(self) {
             self.sync_title_and_frame(&ctx, t0);
         }
+        #[cfg(not(target_arch = "wasm32"))]
+        crate::speech::show(self, &ctx);
         // The synthetic step this frame took is done even when drawing ended early.
         self.flush_shot_and_synthetic(&ctx);
     }

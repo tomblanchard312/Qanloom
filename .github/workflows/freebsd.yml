@@ -44,11 +44,15 @@ jobs:
           usesh: true
           copyback: false
           prepare: |
-            pkg install -y cmake curl llvm libX11 libxkbcommon libXcursor libXi libXrender mesa-libs crosextrafonts-carlito noto-sans-hebrew noto-sans-arabic
+            pkg install -y pkgconf alsa-lib cmake curl llvm libX11 libxkbcommon libXcursor libXi libXrender mesa-libs mesa-dri vulkan-loader crosextrafonts-carlito noto-sans-hebrew noto-sans-arabic noto-sans-thai
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
           run: |
             . "$HOME/.cargo/env"
             export LIBCLANG_PATH="$(ls -d /usr/local/llvm*/lib | sort -V | tail -n 1)"
+            export WGPU_BACKEND=vulkan
+            set -- /usr/local/share/vulkan/icd.d/lvp_icd*.json
+            export VK_ICD_FILENAMES="$1"
+            test -f "$VK_ICD_FILENAMES"
             sh packaging/llama/freebsd-cargo.sh test --workspace
             sh packaging/llama/freebsd-cargo.sh build --release -p wordcraft -p wordcraft-cli
             target/release/wordcraft-cli --version

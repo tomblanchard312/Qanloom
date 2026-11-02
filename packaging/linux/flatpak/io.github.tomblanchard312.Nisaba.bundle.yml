@@ -17,6 +17,7 @@ runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 command: wordcraft
 finish-args:
+  - --socket=pulseaudio
   # On-demand Hugging Face model downloads.
   - --share=network
   # Display: Wayland first; X11 only when no Wayland compositor is running.

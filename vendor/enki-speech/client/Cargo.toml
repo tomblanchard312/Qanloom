@@ -1,0 +1,15 @@
+[package]
+name = "sharedai-client"
+version = "0.2.0"
+edition = "2024"
+license = "MIT"
+[dependencies]
+sharedai-protocol = { version = "=0.2.0", path = "../protocol" }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+base64 = "0.22"
+sha2 = "0.10"
+ureq = { version = "2.12", default-features = false, features = ["tls"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

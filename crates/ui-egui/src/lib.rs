@@ -459,6 +459,8 @@ fn migrate_units(v: &mut Value) {
 
 /// The application.
 pub struct WordApp {
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) speech: enki_speech_ui::SpeechTools,
     pub session: Session,
     pub ui: UiState,
     pub services: Services,
@@ -654,3 +656,6 @@ pub(crate) fn rust_sources(dir: &std::path::Path) -> Vec<std::path::PathBuf> {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(not(target_arch = "wasm32"))]
+mod speech;

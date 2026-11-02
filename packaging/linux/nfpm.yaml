@@ -31,6 +31,7 @@ overrides:
       - enki-runtime (>= 0.2.0~preview.2)
       - libc6 (>= 2.35)
       - libgcc-s1
+      - libasound2 | libasound2t64
       - libxkbcommon0
       - libvulkan1 | libegl1
     recommends:
@@ -44,6 +45,7 @@ overrides:
       - xdg-desktop-portal
   rpm:
     depends:
+      - libasound.so.2()(64bit)
       - libxkbcommon
       - (vulkan-loader or libglvnd-egl)
     recommends:
