@@ -5,7 +5,7 @@
 
 > **VBA review update:** 2026-10-30 · Suggest code proposes a compiler-checked whole-module replacement with explicit Replace module and Undo. Closing with unsaved VBA shows Save / Don’t Save / Cancel; document saving remains a separate prompt. Other intermittent hangs remain under investigation.
 
-> **Scribe identity:** 2026-10-26 · Approved blue S/reed-tip artwork is embedded in the ribbon and assistant pane; light/dark headless renders checked.
+> **Scribe identity:** 2026-10-26 · Approved blue S/reed-tip artwork is embedded in the persistent top-bar button and assistant pane; light/dark headless renders checked.
 
 > **Upstream integration:** 2026-10-28 · WordCraft `c4fafc21` merged as `0a873432`, bringing 179 commits since the previous shared point and major UI, engine, document, format, layout, font and PDF modularization. Qanloom features were carried forward; local validation scope and remaining limits are in [integration evidence](upstream-sync.md).
 

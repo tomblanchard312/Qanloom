@@ -783,7 +783,7 @@ fn shape_and_chart_formats_leave_out_of_range_sizes_alone() {
 }
 
 #[test]
-fn review_tab_contains_one_scribe_button() {
+fn scribe_is_in_the_title_bar_instead_of_review() {
     let mut app = WordApp::new(Session::new(wordcraft_doc::Document::new()), crate::Services::default());
     let ctx = egui::Context::default();
     let texture = crate::icons::scribe_texture(&ctx).unwrap();
@@ -792,5 +792,11 @@ fn review_tab_contains_one_scribe_button() {
     });
     let count = output.shapes.iter().filter(|s| matches!(&s.shape,egui::Shape::Mesh(m) if m.texture_id==texture.id())).count();
     output.drop_without_applying_deltas();
-    assert_eq!(count, 1, "Review must paint exactly one Scribe button");
+    assert_eq!(count, 0, "Review no longer contains Scribe");
+    let output = ctx.run_ui(egui::RawInput::default(), |ui| {
+        crate::chrome::title_bar(&mut app, ui);
+    });
+    let count = output.shapes.iter().filter(|s| matches!(&s.shape,egui::Shape::Mesh(m) if m.texture_id==texture.id())).count();
+    output.drop_without_applying_deltas();
+    assert_eq!(count, 1, "the title bar retains the branded Scribe button");
 }

@@ -1,5 +1,7 @@
 # WordCraft roadmap
 
+> **Scribe navigation: 2026-10-30** · The branded Scribe button is always available in the top bar, independent of the selected ribbon tab. The Review shortcut is removed; existing assistant behavior is unchanged.
+
 > **Qanloom rename: 2026-10-30** · DraftHearth is now Qanloom. Product UI, exports, package display names, wordmark, installer artwork and project links use Qanloom. Stable application/settings/upgrade identities and upstream attribution are retained. See [product identity](docs/product-name.md).
 
 

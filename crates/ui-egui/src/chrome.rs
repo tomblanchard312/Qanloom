@@ -357,6 +357,25 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                     }
                     ui.add_space(8.0);
                     // Upstream's community button links to ArtCraft, whose marks a fork may not use: not drawn.
+                    let (rect, scribe) = ui.allocate_exact_size(vec2(82.0, control_h), Sense::click());
+                    icons::paint(
+                        ui.painter(),
+                        Rect::from_center_size(pos2(rect.left() + 12.0, rect.center().y), vec2(20.0, 20.0)),
+                        "assistant",
+                        t.text,
+                        t.accent,
+                    );
+                    ui.painter().text(
+                        pos2(rect.left() + 26.0, rect.center().y),
+                        Align2::LEFT_CENTER,
+                        wordcraft_brand::ASSISTANT_NAME,
+                        regular(12.0),
+                        t.text,
+                    );
+                    scribe.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, wordcraft_brand::ASSISTANT_NAME));
+                    if scribe.on_hover_text(wordcraft_brand::ASSISTANT_NAME).clicked() {
+                        let _ = app.run("view.assistantPane", json!({"value": !app.session.view.assistant_pane}));
+                    }
                     search_box(app, ui, control_h);
                     right_start = ui.min_rect().min.x;
                 });
