@@ -356,8 +356,12 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                         let _ = app.run("ui.backstage", json!({"value": true, "page": "options", "pane": "general"}));
                     }
                     ui.add_space(8.0);
-                    // Upstream's community button links to ArtCraft, whose marks a fork may not use: not drawn.
-                    let (rect, scribe) = ui.allocate_exact_size(vec2(82.0, control_h), Sense::click());
+                    let (rect, enki) = ui.allocate_exact_size(vec2(68.0, control_h), Sense::click());
+                    let shown = app.session.view.assistant_pane;
+                    crate::widgets::bg(ui, rect, &enki, shown, &t);
+                    if enki.has_focus() {
+                        ui.painter().rect_stroke(rect, eridu_style::radius::SMALL, Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+                    }
                     icons::paint(
                         ui.painter(),
                         Rect::from_center_size(pos2(rect.left() + 12.0, rect.center().y), vec2(20.0, 20.0)),
@@ -372,9 +376,9 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                         regular(12.0),
                         t.text,
                     );
-                    scribe.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, wordcraft_brand::ASSISTANT_NAME));
-                    if scribe.on_hover_text(wordcraft_brand::ASSISTANT_NAME).clicked() {
-                        let _ = app.run("view.assistantPane", json!({"value": !app.session.view.assistant_pane}));
+                    enki.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, shown, wordcraft_brand::ASSISTANT_NAME));
+                    if enki.on_hover_text(wordcraft_brand::ASSISTANT_NAME).clicked() {
+                        let _ = app.run("view.assistantPane", json!({"value": !shown}));
                     }
                     #[cfg(not(target_arch = "wasm32"))]
                     app.speech.button(ui, tl!("Voice"));
@@ -640,7 +644,7 @@ pub fn status_bar(app: &mut WordApp, ui: &mut Ui) {
                     let reading = app.session.view.read_mode;
                     let z = (if reading { app.session.view.read_zoom } else { app.canvas.scale / crate::canvas::PX_PER_PT } * 100.0).round();
                     let ztxt = format!("{z}%");
-                    let zfont = TypeRung::Caption.regular();
+                    let zfont = egui::FontId::new(TypeRung::Caption.size(), eridu_style::fonts::numeric());
                     let ztrack = TypeRung::Caption.tracking();
                     let zw = text_width(ui.painter(), &ztxt, &zfont, ztrack, t.text_dim);
                     // A fixed width for three digits plus a small reserve, so the controls to the

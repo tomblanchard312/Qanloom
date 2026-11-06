@@ -65,7 +65,7 @@ fn title_row(ui: &mut Ui, r: Rect, id_title: &str, title: &str, launcher: Option
         if resp.hovered() {
             ui.painter().rect_filled(lr.expand(2.0), 2.0, t.hover);
         }
-        icons::paint(ui.painter(), lr, "launcher", t.text_dim, t.accent);
+        icons::paint_ribbon(ui.painter(), lr, "launcher", t.text_dim, t.accent, false);
         if resp.on_hover_text(crate::i18n::fmt(tl!("{group} settings"), &[("group", title)])).clicked() {
             let _ = app.run(cmd, serde_json::json!({}));
         }
@@ -98,12 +98,13 @@ fn collapsed_group(
     let open_id = collapsed_open_id(ui, id_title, position);
     let was_open = ui.data(|d| d.get_temp::<bool>(open_id)).unwrap_or(false);
     bg(ui, r, &resp, was_open, &t);
-    icons::paint(
+    icons::paint_ribbon(
         ui.painter(),
         Rect::from_center_size(pos2(r.center().x, r.min.y + BIG_ICON_Y), vec2(32.0, 32.0)),
         group_icon(id_title),
         t.icon,
         t.accent,
+        was_open,
     );
     label_line(ui, r.center().x, r.min.y + BIG_LABEL_Y, title, regular(11.5), t.text, true);
     let resp = resp.on_hover_text(title);

@@ -1,4 +1,4 @@
-//! Review › Scribe ([`wordcraft_brand::ASSISTANT_NAME`]): writing suggestions from a model that
+//! Title bar › Enki ([`wordcraft_brand::ASSISTANT_NAME`]): writing suggestions from a model that
 //! runs on this computer.
 //!
 //! GGUF requests run through the installed Enki daemon. Replies stream into the pane;
@@ -10,10 +10,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, TryRecvError};
 
 use egui::Ui;
+use eridu_style::{radius, size, space};
 use serde_json::{Value, json};
 
 use crate::WordApp;
-use crate::theme::{regular, semibold};
+use crate::theme::{Tokens, regular, semibold};
 use wordcraft_brand::ASSISTANT_NAME as NAME;
 
 /// What the writer asks for. `None` is the free-form prompt.
@@ -434,7 +435,7 @@ fn continue_context(app: &WordApp) -> String {
 
 fn ask(app: &mut WordApp, action: Option<Action>) -> Result<Value, String> {
     if app.assistant.job.is_some() {
-        return Err(tl!("Scribe is busy. Stop the current request first.").into());
+        return Err(tl!("Enki is busy. Stop the current request first.").into());
     }
     let selected = app.session.selected_text();
     let text = if selected.trim().is_empty() && action == Some(Action::Continue) { continue_context(app) } else { selected.clone() };
@@ -445,7 +446,7 @@ fn ask(app: &mut WordApp, action: Option<Action>) -> Result<Value, String> {
         return Err(tl!("That selection is too long. Select a smaller passage; nothing has been sent.").into());
     }
     if action.is_none() && app.assistant.prompt.trim().is_empty() {
-        return Err(tl!("Describe what you would like Scribe to write.").into());
+        return Err(tl!("Describe what you would like Enki to write.").into());
     }
     if app.assistant.prompt.chars().count() > 4000 {
         return Err(tl!("Shorten the request to 4000 characters.").into());
@@ -593,6 +594,9 @@ fn working_label(ui: &mut Ui, text: &str) {
 }
 
 pub fn pane(app: &mut WordApp, ui: &mut Ui) {
+    // A dock can clip the pane before its layout rectangle ends.
+    let visible_width = (ui.clip_rect().right() - ui.cursor().left()).max(0.0);
+    ui.set_max_width(ui.available_width().min(visible_width));
     let model_now = app.session.prefs.assistant_model.clone();
     if let Some(m) = app.assistant.poll(&model_now) {
         let _ = app.run("assistant.settings", json!({"model": m}));
@@ -603,20 +607,20 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
     if !app.assistant.asked_models && app.assistant.job.is_none() {
         refresh_models(app);
     }
+    let t = Tokens::get(ui.ctx());
     ui.horizontal_top(|ui| {
-        let (rect, _) = ui.allocate_exact_size(egui::vec2(32.0, 32.0), egui::Sense::hover());
-        let t = crate::theme::Tokens::get(ui.ctx());
+        let (rect, _) = ui.allocate_exact_size(egui::Vec2::splat(space::XXL), egui::Sense::hover());
         crate::icons::paint(ui.painter(), rect, "assistant", t.icon, t.accent);
         ui.add(
             egui::Label::new(
                 egui::RichText::new(tl!("Works privately on this computer. Suggestions arrive as tracked changes you can accept or reject."))
-                    .small()
-                    .weak(),
+                    .font(regular(size::CAPTION))
+                    .color(t.text_dim),
             )
             .wrap(),
         );
     });
-    ui.add_space(8.0);
+    ui.add_space(space::SM);
 
     let work = app.assistant.job.as_ref().map(|j| j.work);
     let busy = work.is_some();
@@ -658,8 +662,13 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
         return;
     }
 
+    if !app.assistant.listed && !busy {
+        working_label(ui, tl!("Checking local Enki availability…"));
+        return;
+    }
+
     // Quick actions on the selection.
-    ui.label(egui::RichText::new(tl!("Writing tools")).font(semibold(13.0)));
+    ui.label(egui::RichText::new(tl!("Writing tools")).font(semibold(size::LABEL)));
     let mut picked: Option<Option<Action>> = None;
     ui.horizontal_wrapped(|ui| {
         for a in Action::ALL {
@@ -668,24 +677,37 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
             }
         }
     });
-    ui.add_space(4.0);
-    let r = ui.add(
-        egui::TextEdit::multiline(&mut app.assistant.prompt)
-            .hint_text(tl!("Ask for a rewrite, or describe what to write…"))
-            .desired_rows(3)
-            .char_limit(4000)
-            .desired_width(f32::INFINITY),
+    ui.add_space(space::SM);
+    egui::Frame::new().fill(t.panel).stroke(egui::Stroke::new(1.0, t.border)).corner_radius(radius::MEDIUM).inner_margin(space::MD as i8).show(
+        ui,
+        |ui| {
+            let label = ui.label(egui::RichText::new(tl!("Message")).font(semibold(size::LABEL)));
+            let r = ui
+                .add(
+                    egui::TextEdit::multiline(&mut app.assistant.prompt)
+                        .hint_text(tl!("Ask for a rewrite, or describe what to write…"))
+                        .desired_rows(3)
+                        .char_limit(4000)
+                        .desired_width(ui.available_width()),
+                )
+                .labelled_by(label.id);
+            let enter = r.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter) && i.modifiers.command);
+            ui.add_space(space::XS);
+            ui.horizontal(|ui| {
+                let can_send = !busy && !app.assistant.prompt.trim().is_empty();
+                let send = egui::Button::new(egui::RichText::new(tl!("Send")).color(t.on_primary))
+                    .fill(t.primary)
+                    .corner_radius(radius::SMALL)
+                    .min_size(egui::vec2(2.0 * space::XXL, space::XXL));
+                if ui.add_enabled(can_send, send).clicked() || (enter && can_send) {
+                    picked = Some(None);
+                }
+                if app.assistant.busy() && ui.button(tl!("Stop")).clicked() {
+                    app.assistant.stop();
+                }
+            });
+        },
     );
-    let enter = r.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter) && i.modifiers.command);
-    ui.horizontal(|ui| {
-        let can_send = !busy && !app.assistant.prompt.trim().is_empty();
-        if ui.add_enabled(can_send, egui::Button::new(tl!("Send"))).clicked() || (enter && can_send) {
-            picked = Some(None);
-        }
-        if app.assistant.busy() && ui.button(tl!("Stop")).clicked() {
-            app.assistant.stop();
-        }
-    });
     if let Some(action) = picked
         && let Err(error) = ask(app, action)
     {
@@ -701,11 +723,17 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
     }
 
     if !app.assistant.reply.is_empty() {
-        ui.add_space(6.0);
-        ui.separator();
-        egui::ScrollArea::vertical().max_height((ui.available_height() - 100.0).max(60.0)).stick_to_bottom(true).show(ui, |ui| {
-            ui.label(egui::RichText::new(app.assistant.reply.as_str()).font(regular(13.0)));
-        });
+        ui.add_space(space::MD);
+        ui.label(egui::RichText::new(tl!("Suggestion")).font(semibold(size::LABEL)));
+        egui::Frame::new().fill(t.panel).stroke(egui::Stroke::new(1.0, t.border)).corner_radius(radius::MEDIUM).inner_margin(space::MD as i8).show(
+            ui,
+            |ui| {
+                egui::ScrollArea::vertical().max_height((ui.available_height() - 100.0).max(60.0)).stick_to_bottom(true).show(ui, |ui| {
+                    ui.set_min_width(ui.available_width());
+                    ui.label(egui::RichText::new(app.assistant.reply.as_str()).font(regular(size::BODY)));
+                });
+            },
+        );
         if !app.assistant.busy() {
             let (had_text, mode) = app.assistant.origin.as_ref().map(|o| (o.had_text, o.mode)).unwrap_or((false, "after"));
             let current = app.assistant.origin.as_ref().is_some_and(|o| o.doc == (app.session.document_id(), app.session.rev()));
@@ -749,28 +777,42 @@ mod tests {
         // The language is per thread; a worker must write in the UI's language, not English.
         crate::i18n::pseudo::set(true);
         let job = spawn(Work::Starting, |tx, _| {
-            let _ = tx.send(Msg::Models(Err(unavailable_text())));
+            let _ = tx.send(Msg::Done(Err(unavailable_text())));
         })
         .unwrap();
         let msg = job.rx.recv_timeout(std::time::Duration::from_secs(10));
         crate::i18n::pseudo::set(false);
-        let Ok(Msg::Models(Err(text))) = msg else { panic!("no message from the worker") };
+        let Ok(Msg::Done(Err(text))) = msg else { panic!("no message from the worker") };
         assert!(text.contains('⟦'), "worker text skipped translation: {text}");
         assert_eq!(crate::i18n::pseudo::unmarked(&text).trim(), "", "{text}");
     }
     #[test]
-    fn scribe_keeps_model_selection_out_of_the_pane() {
+    fn enki_labels_the_composer_and_keeps_model_selection_in_settings() {
         use egui_kittest::kittest::Queryable;
         let mut app = app("test");
         app.assistant.asked_models = true;
+        app.assistant.listed = true;
         app.assistant.models = vec!["private-model-name".into()];
         app.session.prefs.assistant_model = "private-model-name".into();
         let mut h = egui_kittest::Harness::builder()
             .with_size(egui::vec2(480.0, 800.0))
             .with_context_setup(|ctx| ctx.set_fonts(crate::theme::font_definitions(false, false)))
-            .build_ui_state(|ui, app| pane(app, ui), app);
+            .build_ui_state(
+                |ui, app| {
+                    let mut clip = ui.clip_rect();
+                    clip.max.x = 280.0;
+                    ui.set_clip_rect(clip);
+                    pane(app, ui);
+                },
+                app,
+            );
         h.run_steps(2);
         assert!(h.query_by_label("Send").is_some());
+        assert!(h.query_by_label("Message").is_some());
+        for action in Action::ALL {
+            let button = h.get_by_label(action.label());
+            assert!(button.rect().right() <= 280.0, "{} is clipped", action.label());
+        }
         for label in ["Settings", "Model", "private-model-name", "Choose model…"] {
             assert!(h.query_by_label(label).is_none(), "model control visible: {label}");
         }

@@ -27,7 +27,7 @@ pub const HOMEPAGE: &str = "https://github.com/tomblanchard312/Qanloom";
 #[macro_export]
 macro_rules! assistant_name {
     () => {
-        "Scribe"
+        "Enki"
     };
 }
 /// The writing assistant's name (see [`assistant_name!`]).

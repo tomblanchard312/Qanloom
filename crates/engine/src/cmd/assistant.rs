@@ -18,8 +18,8 @@ pub fn author() -> String {
 /// The largest suggestion accepted in one call (a long chapter, not a whole book).
 pub const MAX_TEXT_BYTES: usize = 1 << 20;
 
-/// Where the assistant's commands live (Review tab, its own group).
-const LOCATION: &str = concat!("Review › ", wordcraft_brand::assistant_name!());
+/// Where the assistant is opened.
+const LOCATION: &str = concat!("Title bar › ", wordcraft_brand::assistant_name!());
 
 pub fn specs() -> Vec<CommandSpec> {
     vec![

@@ -11,7 +11,7 @@ ribbon, styles, tables, track changes, references and mail merge; it reads and w
 Qanloom is a fork of [WordCraft](https://github.com/storytold/wordcraft) by the ArtCraft team and
 community. It follows WordCraft closely and adds what a desktop built around local AI needs:
 
-- **Scribe, a built-in local writing assistant**: improve, shorten, correct grammar, adjust tone or
+- **Enki, a built-in local writing assistant**: improve, shorten, correct grammar, adjust tone or
   continue your writing. GGUF models run locally through the Enki daemon; document text stays on
   your computer. Suggestions become tracked changes you accept or reject.
 - **A side-by-side VBA workspace**: edit modules, inspect the document model, place form controls,
@@ -36,9 +36,9 @@ Packages install the programs as `nisaba` and `nisaba-cli`. Settings live in `~/
 installed WordCraft. **Help › Check for Updates** links to Qanloom releases; automatic updates
 are currently disabled while the upstream installer is adapted to Qanloom’s package identity.
 
-## Write with Scribe
+## Write with Enki
 
-1. Open **Review › Scribe**. Under **Settings**, download a catalog model or choose a compatible
+1. Open **Enki** in the title bar. Under **Settings**, download a catalog model or choose a compatible
    local GGUF file. Downloads require internet access; inference runs locally through the Enki
    daemon, which Qanloom starts when needed.
 2. Select text and choose **Improve**, **Shorten**, **Fix grammar** or **More formal**, or enter
@@ -46,14 +46,14 @@ are currently disabled while the upstream installer is adapted to Qanloom’s pa
 3. Review the suggestion, then **Replace** or **Insert** it. Accept or reject the resulting edits
    through the Review tab.
 
-Scribe refuses stale suggestions after document edits or switches, and prevents applying stopped
+Enki refuses stale suggestions after document edits or switches, and prevents applying stopped
 or incomplete results. Model downloads show progress, support cancellation and verify pinned file
 hashes. The catalog includes Qwen, Gemma, Phi-4 mini and Llama 3.2; gated models require access
 through Hugging Face. Model licenses apply separately.
 
-Scribe currently works with selected text or nearby continuation context, with no document-wide
+Enki currently works with selected text or nearby continuation context, with no document-wide
 conversation history. Writing quality varies by model and task; review suggestions before accepting.
-The assistant is available in desktop builds. See [the Scribe guide](docs/assistant.md) for setup,
+The assistant is available in desktop builds. See [the Enki guide](docs/assistant.md) for setup,
 limits and commands.
 
 ## Edit VBA and automate documents

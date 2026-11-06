@@ -1,6 +1,7 @@
 //! File tab (Backstage): Home/New, Open, Info, Save As, Print, Export, Close, Options, About.
 
 use egui::{Align2, Rect, Sense, Stroke, Ui, pos2, vec2};
+use eridu_style::{fonts, glyph};
 use serde_json::json;
 
 use crate::theme::{Tokens, medium, regular, semibold};
@@ -8,17 +9,17 @@ use crate::{WordApp, icons};
 
 /// The side menu: page id, label and icon (#1714).
 const PAGES: [(&str, &str, &str); 11] = [
-    ("home", "Home", "homeFolder"),
-    ("new", "New", "blankPage"),
-    ("open", "Open", "open"),
-    ("info", "Info", "info"),
-    ("recover", "Recover", "recover"),
-    ("save", "Save", "save"),
-    ("saveAs", "Save As", "saveAs"),
-    ("print", "Print", "print"),
-    ("export", "Export", "export"),
-    ("close", "Close", "close"),
-    ("options", "Options", "options"),
+    ("home", "Home", glyph::HOUSE),
+    ("new", "New", glyph::FILE_PLUS),
+    ("open", "Open", glyph::FOLDER_OPEN),
+    ("info", "Info", glyph::INFO),
+    ("recover", "Recover", glyph::CLOCK_COUNTER_CLOCKWISE),
+    ("save", "Save", glyph::FLOPPY_DISK),
+    ("saveAs", "Save As", glyph::FLOPPY_DISK_BACK),
+    ("print", "Print", glyph::PRINTER),
+    ("export", "Export", glyph::EXPORT),
+    ("close", "Close", glyph::X),
+    ("options", "Options", glyph::GEAR),
 ];
 
 /// The Backstage back chevron's centre on macOS (#1873): beside the traffic lights in a
@@ -78,15 +79,16 @@ pub fn show(app: &mut WordApp, ui: &mut Ui) {
                 // No document open (#1129): Info, Save, Save As, Print and Export are greyed out.
                 let on = has_document || works_without_document(id);
                 let (r, resp) = ui.add_enabled_ui(on, |ui| ui.allocate_exact_size(vec2(200.0, 38.0), Sense::click())).inner;
-                resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, on, tl!(label)));
                 let active = app.ui.backstage_page == id;
+                resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, on, active, tl!(label)));
                 if active {
                     ui.painter().rect_filled(r, 0.0, egui::Color32::from_white_alpha(46));
                 } else if on && resp.hovered() {
                     ui.painter().rect_filled(r, 0.0, egui::Color32::from_white_alpha(26));
                 }
-                let ink = if on { egui::Color32::WHITE } else { egui::Color32::from_white_alpha(110) };
-                icons::paint(ui.painter(), Rect::from_center_size(pos2(r.min.x + 31.0, r.center().y), vec2(18.0, 18.0)), icon, ink, ink);
+                let ink = if on { t.on_nav } else { t.on_nav.gamma_multiply(0.43) };
+                let family = if active { fonts::icons_fill() } else { fonts::icons() };
+                ui.painter().text(pos2(r.min.x + 31.0, r.center().y), Align2::CENTER_CENTER, icon, egui::FontId::new(18.0, family), ink);
                 ui.painter().text(
                     pos2(r.min.x + 52.0, r.center().y),
                     Align2::LEFT_CENTER,
@@ -94,6 +96,9 @@ pub fn show(app: &mut WordApp, ui: &mut Ui) {
                     if active { semibold(14.0) } else { medium(14.0) },
                     ink,
                 );
+                if resp.has_focus() {
+                    ui.painter().rect_stroke(r.shrink(2.0), eridu_style::radius::SMALL, Stroke::new(1.0, t.on_nav), egui::StrokeKind::Inside);
+                }
                 if resp.clicked() {
                     match id {
                         // A document without a file goes to the Save As page (as in Word) instead
@@ -220,8 +225,8 @@ fn works_without_document(page: &str) -> bool {
 }
 
 fn heading(ui: &mut Ui, s: &str) {
-    ui.label(egui::RichText::new(tl!(s)).font(semibold(26.0)));
-    ui.add_space(16.0);
+    ui.label(egui::RichText::new(tl!(s)).font(semibold(eridu_style::size::PAGE_HEADING)));
+    ui.add_space(eridu_style::space::LG);
 }
 
 /// Draws a template thumbnail and caption as one accessible button, lazily renders and caches a
