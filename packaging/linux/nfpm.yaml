@@ -60,6 +60,7 @@ overrides:
 contents:
   - src: ${STAGE}/usr/lib/wordcraft/
     dst: /usr/lib/wordcraft/
+    type: tree
   - src: ${STAGE}/usr/bin/nisaba
     dst: /usr/bin/nisaba
     file_info: { mode: 0755 }
