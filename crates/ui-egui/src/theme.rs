@@ -4,9 +4,7 @@ use std::sync::Arc;
 
 use egui::{Align2, Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, Rect, Stroke, Visuals};
 
-/// WordCraft's app colour (and its darker ink for text on light backgrounds).
-pub const APP_COLOR: Color32 = Color32::from_rgb(0x3B, 0x5B, 0xDB);
-pub const APP_INK: Color32 = Color32::from_rgb(0x2B, 0x47, 0xB5);
+use eridu_style::{size, space};
 
 /// The interface theme setting (File › Options › General, View › Interface Theme): a fixed light or
 /// dark palette, or `System`, which follows the OS light/dark appearance live (#115). Dark page
@@ -248,8 +246,11 @@ pub struct Tokens {
     pub pressed: Color32,
     pub checked: Color32,
     pub accent: Color32,
-    /// The File page's side bar; white text and icons sit on it in both themes.
+    /// The File workspace sidebar and its foreground.
     pub nav: Color32,
+    pub on_nav: Color32,
+    pub primary: Color32,
+    pub on_primary: Color32,
     pub accent_text: Color32,
     /// Text/icon colour drawn on top of `accent` (e.g. keytip badge letters).
     pub on_accent: Color32,
@@ -302,33 +303,37 @@ pub struct Tokens {
 
 impl Tokens {
     pub fn light() -> Self {
+        let eridu = eridu_style::LIGHT;
         Tokens {
             dark: false,
-            title_bar: Color32::from_rgb(0xF0, 0xF0, 0xF0),
-            ribbon: Color32::from_rgb(0xF9, 0xF9, 0xF9),
-            tab_strip: Color32::from_rgb(0xF0, 0xF0, 0xF0),
-            canvas: Color32::from_rgb(0xE6, 0xE6, 0xE6),
-            panel: Color32::from_rgb(0xFA, 0xFA, 0xFA),
-            border: Color32::from_rgb(0xE1, 0xE1, 0xE1),
-            border_strong: Color32::from_rgb(0xC8, 0xC8, 0xC8),
-            text: Color32::from_rgb(0x24, 0x24, 0x24),
-            text_dim: Color32::from_rgb(0x61, 0x61, 0x61),
+            title_bar: eridu.surface_subtle,
+            ribbon: eridu.background,
+            tab_strip: eridu.surface_subtle,
+            canvas: eridu.surface_subtle,
+            panel: eridu.surface,
+            border: eridu.border,
+            border_strong: eridu.border,
+            text: eridu.text,
+            text_dim: eridu.text_muted,
             text_disabled: Color32::from_rgb(0xA8, 0xA8, 0xA8),
-            icon: Color32::from_rgb(0x42, 0x42, 0x42),
-            hover: Color32::from_rgb(0xE6, 0xE6, 0xE6),
-            pressed: Color32::from_rgb(0xD6, 0xD6, 0xD6),
-            checked: Color32::from_rgb(0xDD, 0xE3, 0xF8),
-            accent: APP_COLOR,
-            nav: APP_COLOR,
-            accent_text: APP_INK,
-            on_accent: Color32::WHITE,
-            input: Color32::WHITE,
-            input_border: Color32::from_rgb(0x8A, 0x8A, 0x8A),
-            group_label: Color32::from_rgb(0x70, 0x70, 0x70),
+            icon: eridu.text,
+            hover: eridu.surface_hover,
+            pressed: eridu.selected,
+            checked: eridu.selected,
+            accent: eridu.accent,
+            nav: eridu.chrome,
+            on_nav: eridu.on_chrome,
+            primary: eridu.primary,
+            on_primary: eridu.on_primary,
+            accent_text: eridu.accent,
+            on_accent: eridu.accent_text,
+            input: eridu.surface,
+            input_border: Color32::from_gray(0x84),
+            group_label: eridu.text_muted,
             ruler: Color32::from_rgb(0xFF, 0xFF, 0xFF),
             ruler_margin: Color32::from_rgb(0xD4, 0xD4, 0xD4),
             ruler_tick: Color32::from_rgb(0x70, 0x70, 0x70),
-            status_bar: Color32::from_rgb(0xF0, 0xF0, 0xF0),
+            status_bar: eridu.surface_subtle,
             selection: Color32::from_rgba_unmultiplied(0x3B, 0x5B, 0xDB, 0x48),
             find_highlight: Color32::from_rgba_unmultiplied(0xFF, 0xE0, 0x3D, 0x90),
             page_shadow: Color32::from_rgba_unmultiplied(0, 0, 0, 0x22),
@@ -338,10 +343,10 @@ impl Tokens {
             equation_box: Color32::from_rgb(0x6E, 0x9B, 0xE6),
             crop_handle: Color32::BLACK,
             crop_dim: Color32::from_rgba_unmultiplied(0x30, 0x30, 0x30, 0xE0),
-            balloon: Color32::WHITE,
+            balloon: eridu.surface,
             markup_area: Color32::from_rgb(0xF3, 0xF3, 0xF3),
             markup_edge: Color32::from_rgb(0xE0, 0xE0, 0xE0),
-            resolved_text: Color32::from_rgb(0x1B, 0x6B, 0x42),
+            resolved_text: eridu.success,
             author_colors: [
                 Color32::from_rgb(0x2F, 0x6F, 0xD0),
                 Color32::from_rgb(0xB0, 0x3A, 0x2E),
@@ -356,46 +361,49 @@ impl Tokens {
                 Color32::from_rgb(0x8E, 0x44, 0xAD),
                 Color32::from_rgb(0xE0, 0x7B, 0x1F),
             ],
-            menu: Color32::WHITE,
-            blue: Color32::from_rgb(0x2F, 0x6F, 0xD0),
-            red: Color32::from_rgb(0xD1, 0x3B, 0x3B),
-            green: Color32::from_rgb(0x2E, 0x8B, 0x57),
-            orange: Color32::from_rgb(0xE0, 0x7B, 0x1F),
+            menu: eridu.surface,
+            blue: eridu.accent,
+            red: eridu.danger,
+            green: eridu.success,
+            orange: eridu.warning,
             close_hover: Color32::from_rgb(0xC4, 0x2B, 0x1C),
             close_pressed: Color32::from_rgb(0xA6, 0x23, 0x16),
             on_close: Color32::WHITE,
         }
     }
     pub fn dark() -> Self {
+        let eridu = eridu_style::DARK;
         Tokens {
             dark: true,
-            title_bar: Color32::from_rgb(0x1F, 0x1F, 0x1F),
-            ribbon: Color32::from_rgb(0x29, 0x29, 0x29),
-            tab_strip: Color32::from_rgb(0x1F, 0x1F, 0x1F),
-            canvas: Color32::from_rgb(0x14, 0x14, 0x14),
-            panel: Color32::from_rgb(0x26, 0x26, 0x26),
-            border: Color32::from_rgb(0x3A, 0x3A, 0x3A),
-            border_strong: Color32::from_rgb(0x55, 0x55, 0x55),
-            text: Color32::from_rgb(0xEE, 0xEE, 0xEE),
-            text_dim: Color32::from_rgb(0xC8, 0xC8, 0xC8),
+            title_bar: eridu.surface_subtle,
+            ribbon: eridu.background,
+            tab_strip: eridu.surface_subtle,
+            canvas: eridu.background,
+            panel: eridu.surface,
+            border: eridu.border,
+            border_strong: eridu.border,
+            text: eridu.text,
+            text_dim: eridu.text_muted,
             text_disabled: Color32::from_rgb(0x6A, 0x6A, 0x6A),
-            icon: Color32::from_rgb(0xDD, 0xDD, 0xDD),
-            hover: Color32::from_rgb(0x3D, 0x3D, 0x3D),
-            pressed: Color32::from_rgb(0x4A, 0x4A, 0x4A),
-            checked: Color32::from_rgb(0x2E, 0x3A, 0x66),
-            accent: Color32::from_rgb(0x7A, 0x93, 0xF0),
-            nav: Color32::from_rgb(0x27, 0x31, 0x5C),
-            accent_text: Color32::from_rgb(0x9C, 0xB0, 0xF5),
-            // Dark text on the light dark-theme accent: white on #7a93f0 is only 2.9:1 (#655).
-            on_accent: Color32::from_rgb(0x11, 0x16, 0x2E),
-            input: Color32::from_rgb(0x1E, 0x1E, 0x1E),
-            input_border: Color32::from_rgb(0x7A, 0x7A, 0x7A),
-            group_label: Color32::from_rgb(0xA0, 0xA0, 0xA0),
+            icon: eridu.text,
+            hover: eridu.surface_hover,
+            pressed: eridu.selected,
+            checked: eridu.selected,
+            accent: eridu.accent,
+            nav: eridu.chrome,
+            on_nav: eridu.on_chrome,
+            primary: eridu.primary,
+            on_primary: eridu.on_primary,
+            accent_text: eridu.accent,
+            on_accent: eridu.accent_text,
+            input: eridu.surface,
+            input_border: Color32::from_gray(0x84),
+            group_label: eridu.text_muted,
             // The text area is lighter than the margins, as in the light theme (#1148).
             ruler: Color32::from_rgb(0x45, 0x45, 0x45),
             ruler_margin: Color32::from_rgb(0x2E, 0x2E, 0x2E),
             ruler_tick: Color32::from_rgb(0xB4, 0xB4, 0xB4),
-            status_bar: Color32::from_rgb(0x1F, 0x1F, 0x1F),
+            status_bar: eridu.surface_subtle,
             selection: Color32::from_rgba_unmultiplied(0x7A, 0x93, 0xF0, 0x55),
             find_highlight: Color32::from_rgba_unmultiplied(0xC8, 0xA8, 0x00, 0x70),
             page_shadow: Color32::from_rgba_unmultiplied(0, 0, 0, 0x60),
@@ -405,13 +413,13 @@ impl Tokens {
             equation_box: Color32::from_rgb(0x6E, 0x9B, 0xE6),
             crop_handle: Color32::BLACK,
             crop_dim: Color32::from_rgba_unmultiplied(0x30, 0x30, 0x30, 0xE0),
-            balloon: Color32::from_rgb(0x2B, 0x2B, 0x2B),
+            balloon: eridu.surface,
             markup_area: Color32::from_rgb(0x1B, 0x1B, 0x1B),
             markup_edge: Color32::from_rgb(0x3A, 0x3A, 0x3A),
-            resolved_text: Color32::from_rgb(0x5B, 0xC0, 0x8A),
+            resolved_text: eridu.success,
             author_colors: [
                 Color32::from_rgb(0x7F, 0xA8, 0xF2),
-                Color32::from_rgb(0xE5, 0x78, 0x6B),
+                Color32::from_rgb(0xE5, 0x7C, 0x6B),
                 Color32::from_rgb(0x6F, 0xBF, 0x73),
                 Color32::from_rgb(0xC0, 0x8F, 0xE0),
                 Color32::from_rgb(0xF0, 0xA0, 0x50),
@@ -423,11 +431,11 @@ impl Tokens {
                 Color32::from_rgb(0x8E, 0x44, 0xAD),
                 Color32::from_rgb(0xE0, 0x7B, 0x1F),
             ],
-            menu: Color32::from_rgb(0x2B, 0x2B, 0x2B),
-            blue: Color32::from_rgb(0x6C, 0x9B, 0xEA),
-            red: Color32::from_rgb(0xEE, 0x6A, 0x6A),
-            green: Color32::from_rgb(0x5B, 0xC0, 0x8A),
-            orange: Color32::from_rgb(0xF0, 0xA0, 0x50),
+            menu: eridu.surface,
+            blue: eridu.accent,
+            red: eridu.danger,
+            green: eridu.success,
+            orange: eridu.warning,
             // A little lighter than the light theme's red, so it reads against the dark window.
             close_hover: Color32::from_rgb(0xD6, 0x3C, 0x2C),
             close_pressed: Color32::from_rgb(0xB3, 0x30, 0x23),
@@ -598,6 +606,18 @@ pub fn font_definitions_language(prefer_hans: bool, prefer_korean: bool, prefer_
     }
     #[cfg(target_arch = "wasm32")]
     let _ = system_cjk;
+    let mut shared = eridu_style::fonts::definitions();
+    for family in [eridu_style::fonts::numeric(), eridu_style::fonts::icons(), eridu_style::fonts::icons_fill()] {
+        if let Some(mut chain) = shared.families.remove(&family) {
+            for name in &chain {
+                if let Some(data) = shared.font_data.remove(name) {
+                    fonts.font_data.insert(name.clone(), data);
+                }
+            }
+            chain.retain(|name| fonts.font_data.contains_key(name));
+            fonts.families.insert(family, chain);
+        }
+    }
     // Symbols and emoji fall back to egui's defaults (kept in the families).
     fonts
 }
@@ -671,9 +691,9 @@ impl TypeRung {
     /// Font size in points.
     pub fn size(self) -> f32 {
         match self {
-            TypeRung::Chrome => 12.5,
+            TypeRung::Chrome => size::LABEL,
             TypeRung::Control => 11.5,
-            TypeRung::Caption => 11.0,
+            TypeRung::Caption => size::CAPTION,
         }
     }
     /// Extra letter-spacing in points (em-relative, so it scales with the size).
@@ -773,14 +793,14 @@ pub fn apply(ctx: &egui::Context, appearance: Appearance) {
     ctx.set_visuals_of(egui::Theme::Light, visuals(&Tokens::light()));
     ctx.set_visuals_of(egui::Theme::Dark, visuals(&Tokens::dark()));
     ctx.all_styles_mut(|s| {
-        s.spacing.item_spacing = egui::vec2(6.0, 4.0);
-        s.spacing.button_padding = egui::vec2(8.0, 3.0);
-        s.spacing.interact_size = egui::vec2(24.0, 22.0);
-        s.spacing.menu_margin = egui::Margin::same(6);
-        s.text_styles.insert(egui::TextStyle::Body, regular(12.5));
-        s.text_styles.insert(egui::TextStyle::Button, regular(12.5));
-        s.text_styles.insert(egui::TextStyle::Small, regular(10.5));
-        s.text_styles.insert(egui::TextStyle::Heading, semibold(17.0));
+        s.spacing.item_spacing = egui::vec2(space::SM, space::XS);
+        s.spacing.button_padding = egui::vec2(space::SM, 3.0);
+        s.spacing.interact_size = egui::vec2(space::XL, 22.0);
+        s.spacing.menu_margin = egui::Margin::same(space::SM as i8);
+        s.text_styles.insert(egui::TextStyle::Body, regular(size::BODY));
+        s.text_styles.insert(egui::TextStyle::Button, regular(size::BODY));
+        s.text_styles.insert(egui::TextStyle::Small, regular(size::CAPTION));
+        s.text_styles.insert(egui::TextStyle::Heading, semibold(size::SECTION_HEADING));
         s.interaction.tooltip_delay = 0.45;
     });
     ctx.options_mut(|o| {
@@ -873,19 +893,22 @@ mod tests {
     #[test]
     fn on_accent_reads_on_the_accent() {
         for t in [super::Tokens::light(), super::Tokens::dark()] {
-            for (name, bg) in [("accent", t.accent), ("hover", t.accent_text)] {
-                let r = contrast(t.on_accent, bg);
+            for (name, fg, bg) in [("accent", t.on_accent, t.accent), ("hover", t.on_accent, t.accent_text), ("primary", t.on_primary, t.primary)] {
+                let r = contrast(fg, bg);
                 assert!(r >= 4.5, "dark={}: on_accent on {name} is {r:.2}:1", t.dark);
             }
         }
     }
 
-    /// White text and icons on the File page's side bar reach 4.5:1 in both themes.
+    /// File navigation text and icons reach 4.5:1 in both themes.
     #[test]
     fn the_file_sidebar_reads_in_both_themes() {
         for t in [super::Tokens::light(), super::Tokens::dark()] {
-            let r = contrast(egui::Color32::WHITE, t.nav);
-            assert!(r >= 4.5, "dark={}: white on the sidebar is {r:.2}:1", t.dark);
+            for alpha in [0, 26, 46] {
+                let bg = t.nav.blend(egui::Color32::from_white_alpha(alpha));
+                let r = contrast(t.on_nav, bg);
+                assert!(r >= 4.5, "dark={}: sidebar state alpha {alpha} is {r:.2}:1", t.dark);
+            }
         }
     }
 

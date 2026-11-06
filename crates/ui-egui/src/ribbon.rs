@@ -169,17 +169,26 @@ pub fn show(app: &mut WordApp, ui: &mut Ui) {
                         let (share_size, share_text) =
                             if plan.buttons < 2 { (((share_w + 36.0).max(74.0), 24.0), true) } else { ((30.0, 24.0), false) };
                         let (r, resp) = ui.allocate_exact_size(vec2(share_size.0, share_size.1), Sense::click());
-                        ui.painter().rect_filled(r, 4.0, if resp.hovered() { t.accent_text } else { t.accent });
+                        ui.painter().rect_filled(r, eridu_style::radius::SMALL, t.primary);
+                        if resp.hovered() || resp.has_focus() {
+                            ui.painter().rect_stroke(
+                                r.expand(1.0),
+                                eridu_style::radius::SMALL,
+                                Stroke::new(1.0, t.accent),
+                                egui::StrokeKind::Outside,
+                            );
+                        }
                         let icon_x = if share_text { r.min.x + 14.0 } else { r.center().x };
-                        icons::paint(
+                        icons::paint_ribbon(
                             ui.painter(),
                             Rect::from_center_size(pos2(icon_x, r.center().y), vec2(14.0, 14.0)),
                             "share",
-                            t.on_accent,
-                            t.on_accent,
+                            t.on_primary,
+                            t.on_primary,
+                            false,
                         );
                         if share_text {
-                            ui.painter().text(pos2(r.min.x + 26.0, r.center().y), Align2::LEFT_CENTER, share, medium(12.0), t.on_accent);
+                            ui.painter().text(pos2(r.min.x + 26.0, r.center().y), Align2::LEFT_CENTER, share, medium(12.0), t.on_primary);
                         }
                         resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, share));
                         if resp.on_hover_text(tl!("Export a copy to share (PDF, Word document)")).clicked() {
@@ -317,6 +326,11 @@ pub fn show(app: &mut WordApp, ui: &mut Ui) {
             egui::Frame::NONE.fill(t.ribbon).inner_margin(egui::Margin { left: 8, right: 8, top: 4, bottom: 4 }).stroke(Stroke::new(1.0, t.border)),
         )
         .show(ui, |ui| {
+            // Stacked controls must fit above their group labels in the fixed-height ribbon.
+            let style = ui.style_mut();
+            style.text_styles.insert(egui::TextStyle::Body, regular(12.5));
+            style.text_styles.insert(egui::TextStyle::Button, regular(12.5));
+            style.text_styles.insert(egui::TextStyle::Small, regular(10.5));
             // Right-click on the ribbon (outside a button): Customize Ribbon. Registered first, so
             // the buttons drawn over it keep their own clicks.
             // No document open (#1129): every command is greyed out but Help's.

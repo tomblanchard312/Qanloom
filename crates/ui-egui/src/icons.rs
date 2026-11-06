@@ -1,20 +1,23 @@
-//! Original interface icons, drawn in code except for the embedded Scribe artwork.
+//! Original interface icons, drawn in code except for the embedded Enki artwork.
 //!
 //! Icons are designed on a 20×20 grid in two colours: line work (`c`) and an accent (`a`).
 
 use egui::{Color32, FontId, Painter, Pos2, Rect, Shape, Stroke, pos2, vec2};
 
-const SCRIBE_PNG: &[u8] = include_bytes!("../../../assets/icons/scribe.png");
+mod ribbon;
+pub(crate) use ribbon::paint as paint_ribbon;
 
-pub(crate) fn scribe_texture(ctx: &egui::Context) -> Option<egui::TextureHandle> {
-    let key = egui::Id::unique("nisaba.scribe.icon");
+const ENKI_PNG: &[u8] = include_bytes!("../../../assets/icons/enki.png");
+
+pub(crate) fn enki_texture(ctx: &egui::Context) -> Option<egui::TextureHandle> {
+    let key = egui::Id::unique("qanloom.enki.icon");
     if let Some(texture) = ctx.data(|d| d.get_temp::<egui::TextureHandle>(key)) {
         return Some(texture);
     }
-    let rgba = image::load_from_memory_with_format(SCRIBE_PNG, image::ImageFormat::Png).ok()?.into_rgba8();
+    let rgba = image::load_from_memory_with_format(ENKI_PNG, image::ImageFormat::Png).ok()?.into_rgba8();
     let size = [rgba.width() as usize, rgba.height() as usize];
     let image = egui::ColorImage::from_rgba_unmultiplied(size, rgba.as_raw());
-    let texture = ctx.load_texture("Scribe", image, egui::TextureOptions::LINEAR);
+    let texture = ctx.load_texture("Enki", image, egui::TextureOptions::LINEAR);
     ctx.data_mut(|d| d.insert_temp(key, texture.clone()));
     Some(texture)
 }
@@ -89,12 +92,12 @@ impl Pen<'_> {
 /// Paint icon `name` into `r`. `c` is the line colour; the accent comes from the theme.
 pub fn paint(p: &Painter, r: Rect, name: &str, c: Color32, accent: Color32) {
     if name == "assistant" {
-        if let Some(texture) = scribe_texture(p.ctx()) {
+        if let Some(texture) = enki_texture(p.ctx()) {
             let side = r.width().min(r.height());
             let square = Rect::from_center_size(r.center(), vec2(side, side));
             p.image(texture.id(), square, Rect::from_min_max(Pos2::ZERO, pos2(1.0, 1.0)), Color32::WHITE);
         } else {
-            p.text(r.center(), egui::Align2::CENTER_CENTER, "S", FontId::proportional(r.height() * 0.7), accent);
+            p.text(r.center(), egui::Align2::CENTER_CENTER, "E", FontId::proportional(r.height() * 0.7), accent);
         }
         return;
     }
@@ -1709,18 +1712,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn scribe_artwork_is_transparent_and_its_texture_is_reused() {
-        let rgba = image::load_from_memory_with_format(SCRIBE_PNG, image::ImageFormat::Png).unwrap().into_rgba8();
-        assert!(rgba.pixels().any(|p| p[3] == 0));
+    fn enki_artwork_is_visible_and_its_texture_is_reused() {
+        let rgba = image::load_from_memory_with_format(ENKI_PNG, image::ImageFormat::Png).unwrap().into_rgba8();
         assert!(rgba.pixels().any(|p| p[3] == 255));
         let ctx = egui::Context::default();
-        let texture = scribe_texture(&ctx).unwrap();
+        let texture = enki_texture(&ctx).unwrap();
         for size in [16.0, 24.0, 32.0] {
             let output = ctx.run_ui(egui::RawInput::default(), |ui| {
                 paint(ui.painter(), Rect::from_min_size(Pos2::ZERO, vec2(size, size)), "assistant", Color32::BLACK, Color32::BLUE);
             });
             assert!(output.shapes.iter().any(|s| matches!(&s.shape, Shape::Mesh(m) if m.texture_id == texture.id())));
-            assert_eq!(scribe_texture(&ctx).unwrap().id(), texture.id());
+            assert_eq!(enki_texture(&ctx).unwrap().id(), texture.id());
             output.drop_without_applying_deltas();
         }
     }

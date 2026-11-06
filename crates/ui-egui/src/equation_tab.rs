@@ -227,12 +227,13 @@ pub fn insert_button(ui: &mut Ui, app: &mut WordApp) {
             ui.painter().rect_filled(rr, 4.0, t.hover);
         }
     }
-    crate::icons::paint(
+    crate::icons::paint_ribbon(
         ui.painter(),
         Rect::from_center_size(pos2(r.center().x, r.min.y + BIG_ICON_Y), vec2(32.0, 32.0)),
         "equation",
         t.icon,
         t.accent,
+        false,
     );
     crate::widgets::label_line(ui, r.center().x, r.min.y + BIG_LABEL_Y, label, regular(11.5), t.text, true);
     if rt.on_hover_text(tl!("Insert a new equation (Alt+=)")).clicked() {

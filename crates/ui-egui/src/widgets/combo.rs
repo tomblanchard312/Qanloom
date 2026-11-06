@@ -318,7 +318,7 @@ fn combo_impl(ui: &mut Ui, options: ComboOptions<'_>) -> Option<String> {
             show_hint(&resp, tip, &[]);
             show_hint(&aresp, tip, &[]);
         }
-        icons::paint(ui.painter(), Rect::from_center_size(ar.center(), vec2(DROPDOWN, DROPDOWN)), "dropdown", t.icon, t.accent);
+        icons::paint_ribbon(ui.painter(), Rect::from_center_size(ar.center(), vec2(DROPDOWN, DROPDOWN)), "dropdown", t.icon, t.accent, false);
         // The list drops from the box's left edge, as in Word, not from the arrow (#535).
         // The font list closes on a chosen entry or a click outside it, not on its headings.
         let close = if search { egui::PopupCloseBehavior::CloseOnClickOutside } else { egui::PopupCloseBehavior::CloseOnClick };

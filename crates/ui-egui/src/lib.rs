@@ -476,7 +476,7 @@ pub struct WordApp {
     pub restrict: dialogs_review::RestrictPane,
     pub status_msg: Option<(String, f64)>,
     pub previews: previews::Previews,
-    /// Scribe assistant conversation and local model state.
+    /// Enki assistant conversation and local model state.
     pub assistant: assistant_pane::State,
     /// Image generation and inpainting state.
     pub image_gen: image_gen::State,
