@@ -40,6 +40,11 @@ fn nav_harness(language: &str, percent: u16) -> egui_kittest::Harness<'static, W
     h
 }
 
+// File and Options both have a "Save" row. The Options pane starts after the 200-point File sidebar.
+fn is_options_nav_row(node: &egui_kittest::Node<'_>) -> bool {
+    node.rect().left() >= 200.0 && node.accesskit_node().toggled().is_some()
+}
+
 /// File › Options must not offer a way around the protected document's author check.
 #[test]
 fn user_name_field_disables_when_protection_starts() {
@@ -71,7 +76,7 @@ fn options_nav_labels_stay_inside_their_rows() {
                 for id in wordcraft_engine::cmd::options::PANES {
                     let label = crate::i18n::tr(crate::i18n::Lang::from_pref(language), super::pane_label(id));
                     let node =
-                        h.query_all_by_label(label).find(|n| n.accesskit_node().toggled().is_some()).expect("pane has its full accessible name");
+                        h.query_all_by_label(label).find(is_options_nav_row).expect("pane has its full accessible name");
                     assert_eq!(
                         node.accesskit_node().toggled(),
                         Some(if id == selected { egui::accesskit::Toggled::True } else { egui::accesskit::Toggled::False })
@@ -112,7 +117,7 @@ fn options_nav_rows_keep_hover_and_selection() {
                 let lang = crate::i18n::Lang::from_pref(language);
                 let row = h
                     .query_all_by_label(crate::i18n::tr(lang, super::pane_label(id)))
-                    .find(|n| n.accesskit_node().toggled().is_some())
+                    .find(is_options_nav_row)
                     .expect("pane has its full accessible name")
                     .rect();
                 // Both ends of the row, including its empty left inset, stay clickable.
