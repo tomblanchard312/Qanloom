@@ -75,8 +75,7 @@ fn options_nav_labels_stay_inside_their_rows() {
                 h.run_steps(4);
                 for id in wordcraft_engine::cmd::options::PANES {
                     let label = crate::i18n::tr(crate::i18n::Lang::from_pref(language), super::pane_label(id));
-                    let node =
-                        h.query_all_by_label(label).find(is_options_nav_row).expect("pane has its full accessible name");
+                    let node = h.query_all_by_label(label).find(is_options_nav_row).expect("pane has its full accessible name");
                     assert_eq!(
                         node.accesskit_node().toggled(),
                         Some(if id == selected { egui::accesskit::Toggled::True } else { egui::accesskit::Toggled::False })

@@ -35,19 +35,32 @@ jobs:
       matrix:
         release: ["14", "15"]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/fetch-eridu-style
+        with:
+          ssh-key: ${{ secrets.ERIDU_STYLE_DEPLOY_KEY }}
       - name: Build and test in a FreeBSD VM
         uses: vmactions/freebsd-vm@v1
         with:
           release: ${{ matrix.release }}
           cpu: 4
           usesh: true
+          sync: rsync
           copyback: false
           prepare: |
-            pkg install -y pkgconf alsa-lib cmake curl llvm libX11 libxkbcommon libXcursor libXi libXrender mesa-libs mesa-dri vulkan-loader crosextrafonts-carlito noto-sans-hebrew noto-sans-arabic noto-sans-thai
+            pkg install -y git pkgconf alsa-lib cmake curl llvm libX11 libxkbcommon libXcursor libXi libXrender mesa-libs mesa-dri vulkan-loader crosextrafonts-carlito noto-sans-hebrew noto-sans-arabic noto-sans-thai
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
           run: |
             . "$HOME/.cargo/env"
+            # Rsync includes the authenticated checkout. The deploy key stays on the host.
+            export CARGO_NET_GIT_FETCH_WITH_CLI=true
+            export GIT_CONFIG_COUNT=2
+            export GIT_CONFIG_KEY_0="url.file://$(pwd -P)/.git/ci-eridu-style.insteadOf"
+            export GIT_CONFIG_KEY_1="$GIT_CONFIG_KEY_0"
+            export GIT_CONFIG_VALUE_0=https://github.com/tomblanchard312/eridu-style.git
+            export GIT_CONFIG_VALUE_1=https://github.com/tomblanchard312/eridu-style
             export LIBCLANG_PATH="$(ls -d /usr/local/llvm*/lib | sort -V | tail -n 1)"
             export WGPU_BACKEND=vulkan
             set -- /usr/local/share/vulkan/icd.d/lvp_icd*.json
