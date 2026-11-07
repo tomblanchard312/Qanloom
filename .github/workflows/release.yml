@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write
       packages: write
-    uses: tomblanchard312/craft-common-actions/.github/workflows/private-release.yml@b8680be5cf185c014537b81281c009692af9930d
+    uses: tomblanchard312/craft-common-actions/.github/workflows/private-release.yml@44b245123b4e4dad896decb7e7689d887c57d95f
     with:
       app-name: wordcraft
       app-title: WordCraft
