@@ -2,7 +2,7 @@
 
 `enki-client` and `enki-protocol` contain the client/protocol sources used by Qanloom's
 existing Enki image integration. The source is copied without behavior changes (repository formatting applied) from the local
-`tomblanchard312/Enki` checkout on 2026-10-30 (base commit `48abad7`, including local
+`tomblanchard312/Oqelith` checkout on 2026-10-30 (base commit `48abad7`, including local
 image/protocol changes not yet published there). No daemon or inference implementation
 is copied. The package manifests use explicit versions instead of inheriting Enki's
 workspace, and the protocol path points to this snapshot.
