@@ -1,0 +1,42 @@
+name: Fetch private eridu-style
+description: Make the pinned dependency available to Cargo without retaining the deploy key.
+inputs:
+  ssh-key:
+    description: Read-only deploy key for eridu-style
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Require a trusted build credential
+      shell: bash
+      env:
+        DEPLOY_KEY: ${{ inputs.ssh-key }}
+      run: |
+        if [ -z "$DEPLOY_KEY" ]; then
+          echo "::error::Private eridu-style access is available only to trusted builds."
+          exit 1
+        fi
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: tomblanchard312/eridu-style
+        ref: d3b4cdc03706ac100fae2de907282575652b76ad
+        path: .git/ci-eridu-style
+        fetch-depth: 0
+        ssh-key: ${{ inputs.ssh-key }}
+        persist-credentials: false
+    - name: Route the pinned Cargo dependency to the checkout
+      shell: bash
+      run: |
+        set -euo pipefail
+        path="$(pwd -P)/.git/ci-eridu-style"
+        if [ "$RUNNER_OS" = Windows ]; then
+          path="/$(cygpath -m "$path")"
+        fi
+        {
+          echo CARGO_NET_GIT_FETCH_WITH_CLI=true
+          echo GIT_CONFIG_COUNT=2
+          echo "GIT_CONFIG_KEY_0=url.file://$path.insteadOf"
+          echo GIT_CONFIG_VALUE_0=https://github.com/tomblanchard312/eridu-style.git
+          echo "GIT_CONFIG_KEY_1=url.file://$path.insteadOf"
+          echo GIT_CONFIG_VALUE_1=https://github.com/tomblanchard312/eridu-style
+        } >> "$GITHUB_ENV"
