@@ -18,8 +18,9 @@ concurrency:
 
 jobs:
   gate:
-    # Tracks @main so suite-wide CI fixes reach every app without a PR in each repository.
-    uses: storytold/craft-common-actions/.github/workflows/gate.yml@main
+    uses: ./.github/workflows/eridu-style-gate.yml
+    secrets:
+      eridu-style-key: ${{ secrets.ERIDU_STYLE_DEPLOY_KEY }}
     with:
       # Same craft-fonts commit as release.yml.
       craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83

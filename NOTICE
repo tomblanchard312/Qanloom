@@ -139,7 +139,7 @@ the runtime manifest records the target and bundled component paths.
 Enki client/protocol snapshot
 -----------------------------
 The sources under vendor/enki-client and vendor/enki-protocol originate from
-tomblanchard312/Enki. They retain their existing UNLICENSED designation and are not
+tomblanchard312/Oqelith. They retain their existing UNLICENSED designation and are not
 relicensed under the application's MIT OR Apache-2.0 terms. See vendor/README.md for
 the source revision and snapshot scope. No new license grant is made by this notice.
 

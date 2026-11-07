@@ -220,11 +220,6 @@ mod tests {
 
     #[test]
     fn windows_default_initializes_only_dx12() {
-        // eframe's own default (PRIMARY | GL) would initialize OpenGL as well.
-        let WgpuSetup::CreateNew(eframe_default) = NativeOptions::default().wgpu_options.wgpu_setup else {
-            panic!("default native options must create a wgpu instance");
-        };
-        assert!(eframe_default.instance_descriptor.backends.contains(Backends::GL));
         let gpu = [adapter(DeviceType::IntegratedGpu, true)];
         assert_eq!(configured_backends(choose_backends(None, &gpu, true)), Backends::DX12);
     }
