@@ -26,6 +26,7 @@ jobs:
     # Only this job publishes the GitHub release, so only it gets write access.
     permissions:
       contents: write
+      packages: write
     uses: tomblanchard312/craft-common-actions/.github/workflows/private-release.yml@b8680be5cf185c014537b81281c009692af9930d
     with:
       app-name: wordcraft
