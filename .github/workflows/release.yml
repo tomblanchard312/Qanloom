@@ -5,6 +5,10 @@ on:
     branches: [release]
   workflow_dispatch:
     inputs:
+      validate-only:
+        description: Check private release dependency access without publishing
+        type: boolean
+        default: false
       version:
         description: "Version override for a test run, e.g. 0.2.0-rc.1 (empty: Cargo.toml)"
         type: string
@@ -22,15 +26,18 @@ jobs:
     # Only this job publishes the GitHub release, so only it gets write access.
     permissions:
       contents: write
-    # Intentionally tracked at @main (not SHA-pinned) so org-wide CI improvements, security fixes, and build optimizations propagate without PR churn across all craftapp repos.
-    uses: storytold/craft-common-actions/.github/workflows/release.yml@main
+      packages: write
+    uses: tomblanchard312/craft-common-actions/.github/workflows/private-release.yml@44b245123b4e4dad896decb7e7689d887c57d95f
     with:
       app-name: wordcraft
       app-title: WordCraft
       craft-fonts-ref: b076417b5880bd4154bd22f00695b1d28c6bea83
       web-craft-fonts: true
       version: ${{ inputs.version }}
+      validate-only: ${{ inputs.validate-only || false }}
+      allowed-git-packages: "[[\"eridu-style\",\"git+https://github.com/tomblanchard312/eridu-style?rev=d3b4cdc03706ac100fae2de907282575652b76ad#d3b4cdc03706ac100fae2de907282575652b76ad\"]]"
     secrets:
+      ERIDU_STYLE_DEPLOY_KEY: ${{ secrets.ERIDU_STYLE_DEPLOY_KEY }}
       APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
       APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
       KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
