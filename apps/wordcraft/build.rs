@@ -14,8 +14,8 @@ fn main() {
     }
     let mut res = winresource::WindowsResource::new();
     res.set_icon("../../assets/app-icon/wordcraft.ico")
-        .set("ProductName", "Qanloom")
-        .set("FileDescription", "Qanloom word processor (based on WordCraft)")
+        .set("ProductName", "Tavru Docs")
+        .set("FileDescription", "Tavru Docs word processor (based on WordCraft)")
         .set("CompanyName", "Tom Blanchard")
         .set("LegalCopyright", "Copyright (c) the WordCraft authors and Tom Blanchard. MIT OR Apache-2.0.")
         .set("OriginalFilename", "nisaba.exe")

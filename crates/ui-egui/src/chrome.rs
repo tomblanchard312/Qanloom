@@ -34,7 +34,7 @@ fn qat_button(ui: &mut Ui, app: &mut WordApp, icon: &str, tip: &str, id: &str, e
     let (r, _) = ui.allocate_exact_size(vec2(26.0, 24.0), Sense::hover());
     let resp = ui.interact(r, qat_button_id(id), Sense::click());
     if resp.hovered() && enabled {
-        ui.painter().rect_filled(r, 4.0, t.hover);
+        ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, t.hover);
     }
     let c = if enabled { t.icon } else { t.text_disabled };
     icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(16.0, 16.0)), icon, c, if enabled { t.accent } else { c });
@@ -89,7 +89,7 @@ fn quick_access(ui: &mut Ui, app: &mut WordApp) {
     let (r, _) = ui.allocate_exact_size(vec2(26.0, 24.0), Sense::hover());
     let resp = ui.interact(r, qat_menu_button_id(), Sense::click());
     if resp.hovered() {
-        ui.painter().rect_filled(r, 4.0, t.hover);
+        ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, t.hover);
     }
     icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(16.0, 16.0)), "more", t.icon, t.accent);
     let resp = resp.on_hover_text(tl!("Customize Quick Access Toolbar"));
@@ -139,7 +139,7 @@ fn undo_list_button(ui: &mut Ui, app: &mut WordApp, enabled: bool) {
     let (r, _) = ui.allocate_exact_size(vec2(12.0, 24.0), Sense::hover());
     let resp = ui.interact(r, undo_list_button_id(), if enabled { Sense::click() } else { Sense::hover() });
     if resp.hovered() && enabled {
-        ui.painter().rect_filled(r, 4.0, t.hover);
+        ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, t.hover);
     }
     let c = if enabled { t.icon } else { t.text_disabled };
     icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(9.0, 9.0)), "dropdown", c, c);
@@ -356,18 +356,18 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                         let _ = app.run("ui.backstage", json!({"value": true, "page": "options", "pane": "general"}));
                     }
                     ui.add_space(8.0);
-                    let (rect, enki) = ui.allocate_exact_size(vec2(68.0, control_h), Sense::click());
+                    let (rect, ask) = ui.allocate_exact_size(vec2(68.0, control_h), Sense::click());
                     let shown = app.session.view.assistant_pane;
-                    crate::widgets::bg(ui, rect, &enki, shown, &t);
-                    if enki.has_focus() {
-                        ui.painter().rect_stroke(rect, eridu_style::radius::SMALL, Stroke::new(1.0, t.accent), egui::StrokeKind::Inside);
+                    crate::widgets::bg(ui, rect, &ask, shown, &t);
+                    if ask.has_focus() {
+                        ui.painter().rect_stroke(rect, crate::theme::CONTROL_RADIUS, Stroke::new(2.0, t.accent), egui::StrokeKind::Inside);
                     }
-                    icons::paint(
-                        ui.painter(),
-                        Rect::from_center_size(pos2(rect.left() + 12.0, rect.center().y), vec2(20.0, 20.0)),
-                        "assistant",
+                    ui.painter().text(
+                        pos2(rect.left() + 12.0, rect.center().y),
+                        Align2::CENTER_CENTER,
+                        eridu_style::glyph::CHAT_TEXT,
+                        egui::FontId::new(20.0, if shown { eridu_style::fonts::icons_fill() } else { eridu_style::fonts::icons() }),
                         t.text,
-                        t.accent,
                     );
                     ui.painter().text(
                         pos2(rect.left() + 26.0, rect.center().y),
@@ -376,8 +376,8 @@ pub fn title_bar(app: &mut WordApp, ui: &mut Ui) {
                         regular(12.0),
                         t.text,
                     );
-                    enki.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, shown, wordcraft_brand::ASSISTANT_NAME));
-                    if enki.on_hover_text(wordcraft_brand::ASSISTANT_NAME).clicked() {
+                    ask.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, shown, wordcraft_brand::ASSISTANT_NAME));
+                    if ask.on_hover_text(wordcraft_brand::ASSISTANT_NAME).clicked() {
                         let _ = app.run("view.assistantPane", json!({"value": !shown}));
                     }
                     #[cfg(not(target_arch = "wasm32"))]
@@ -516,7 +516,7 @@ pub fn screen_bar(app: &mut WordApp, ui: &mut Ui, screen: Screen) {
             let r = Rect::from_center_size(full.center(), vec2(40.0, 20.0));
             let resp = ui.allocate_rect(r, Sense::click());
             let shade = if resp.hovered() || app.focus_ribbon { egui::Color32::from_gray(70) } else { egui::Color32::from_gray(40) };
-            ui.painter().rect_filled(r, 4.0, shade);
+            ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, shade);
             icons::paint(ui.painter(), Rect::from_center_size(r.center(), vec2(14.0, 14.0)), "more", egui::Color32::from_gray(220), t.accent);
             resp.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tl!("Show the ribbon")));
             if resp.on_hover_text(tl!("Show the ribbon")).clicked() {
@@ -691,9 +691,9 @@ pub fn status_bar(app: &mut WordApp, ui: &mut Ui) {
                     ] {
                         let (r, resp) = ui.allocate_exact_size(vec2(22.0, 20.0), Sense::click());
                         if on {
-                            ui.painter().rect_filled(r, 3.0, t.checked);
+                            ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, t.checked);
                         } else if resp.hovered() {
-                            ui.painter().rect_filled(r, 3.0, t.hover);
+                            ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, t.hover);
                         }
                         icons::paint(ui.painter(), r.shrink(3.0), icon, t.icon, t.accent);
                         resp.widget_info(|| egui::WidgetInfo::selected(egui::Role::Button, true, on, name));
@@ -709,7 +709,7 @@ pub fn status_bar(app: &mut WordApp, ui: &mut Ui) {
                     // message has to stop before it (#2402).
                     controls_left = r.min.x;
                     if resp.hovered() {
-                        ui.painter().rect_filled(r, 3.0, t.hover);
+                        ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, t.hover);
                     }
                     icons::paint(ui.painter(), Rect::from_min_size(r.min + vec2(2.0, 2.0), vec2(16.0, 16.0)), "focus", t.icon, t.accent);
                     let ffont = TypeRung::Caption.regular();
@@ -754,7 +754,7 @@ fn small_icon(ui: &mut Ui, icon: &str, tip: &str) -> bool {
     let t = Tokens::get(ui.ctx());
     let (r, resp) = ui.allocate_exact_size(vec2(18.0, 18.0), Sense::click());
     if resp.hovered() {
-        ui.painter().rect_filled(r, 3.0, t.hover);
+        ui.painter().rect_filled(r, crate::theme::CONTROL_RADIUS, t.hover);
     }
     icons::paint(ui.painter(), r.shrink(3.0), icon, t.icon, t.accent);
     resp.on_hover_text(tip).clicked()

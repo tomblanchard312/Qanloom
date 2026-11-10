@@ -22,7 +22,7 @@ fn every_side_menu_item_has_an_eridu_icon() {
     out.textures_delta.clear();
 }
 
-/// Regression test for #504: the side menu is a fixed 200 points wide, but egui drew a resize
+/// Regression test for #504: the side menu has a stable width, but egui drew a resize
 /// line and showed a resize pointer on its right edge that did nothing.
 #[test]
 fn the_side_menu_edge_is_not_a_resize_handle() {
@@ -30,7 +30,7 @@ fn the_side_menu_edge_is_not_a_resize_handle() {
     app.ui.language = "en".into();
     app.ui.backstage = true;
     let ctx = egui::Context::default();
-    let edge = egui::pos2(200.0, 400.0);
+    let edge = egui::pos2(260.0, 400.0);
     for frame in 0..8 {
         let mut input = egui::RawInput {
             time: Some(f64::from(frame) * 0.1),
@@ -1044,4 +1044,24 @@ fn backstage_save_as_sidebar_opens_save_as_page() {
     h.get_by_label("Save As").click();
     h.run_steps(4);
     assert_eq!(h.state().ui.backstage_page, "saveAs");
+}
+
+/// Home keeps its document previews reachable in a narrow TavruOS workspace.
+#[test]
+fn home_templates_wrap_inside_a_narrow_workspace() {
+    let mut app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::new()), Services::default());
+    app.run("ui.backstage", json!({"value": true, "page": "home"})).unwrap();
+    let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(800.0, 900.0)).build_ui_state(
+        |ui, app: &mut WordApp| {
+            let ctx = ui.ctx().clone();
+            app.logic(&ctx);
+            app.ui(ui);
+        },
+        app,
+    );
+    h.run_steps(4);
+    let first = h.get_by_label("Blank document").rect();
+    let last = h.get_by_label("Résumé").rect();
+    assert!(last.min.y > first.min.y, "templates wrap rather than clipping horizontally");
+    assert!(last.max.x <= 800.0);
 }

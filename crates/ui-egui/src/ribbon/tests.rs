@@ -783,21 +783,24 @@ fn shape_and_chart_formats_leave_out_of_range_sizes_alone() {
 }
 
 #[test]
-fn enki_is_in_the_title_bar_instead_of_review() {
+fn ask_uses_chat_text_in_the_title_bar_instead_of_review() {
     let mut app = WordApp::new(Session::new(wordcraft_doc::Document::new()), crate::Services::default());
     let ctx = egui::Context::default();
     crate::theme::install_fonts(&ctx);
-    let texture = crate::icons::enki_texture(&ctx).unwrap();
+    let texture = crate::icons::assistant_texture(&ctx).unwrap();
     let output = ctx.run_ui(egui::RawInput::default(), |ui| {
         ui.horizontal(|ui| super::review::review(&mut app, ui));
     });
     let count = output.shapes.iter().filter(|s| matches!(&s.shape,egui::Shape::Mesh(m) if m.texture_id==texture.id())).count();
     output.drop_without_applying_deltas();
-    assert_eq!(count, 0, "Review no longer contains Enki");
+    assert_eq!(count, 0, "Review does not contain the assistant logo");
     let output = ctx.run_ui(egui::RawInput::default(), |ui| {
         crate::chrome::title_bar(&mut app, ui);
     });
     let count = output.shapes.iter().filter(|s| matches!(&s.shape,egui::Shape::Mesh(m) if m.texture_id==texture.id())).count();
+    for label in ["Ask", eridu_style::glyph::CHAT_TEXT] {
+        assert!(output.shapes.iter().any(|s| matches!(&s.shape, egui::Shape::Text(text) if text.galley.text() == label)), "missing {label}");
+    }
     output.drop_without_applying_deltas();
-    assert_eq!(count, 1, "the title bar retains the branded Enki button");
+    assert_eq!(count, 0, "Ask uses ChatText rather than the assistant logo");
 }

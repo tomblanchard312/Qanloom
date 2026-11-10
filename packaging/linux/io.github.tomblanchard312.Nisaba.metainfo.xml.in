@@ -5,17 +5,17 @@
   <id>io.github.tomblanchard312.Nisaba</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT OR Apache-2.0</project_license>
-  <name>Qanloom</name>
+  <name>Tavru Docs</name>
   <summary>Write and design documents; open and save Word files</summary>
   <developer id="io.github.tomblanchard312">
     <name>Tom Blanchard</name>
   </developer>
   <description>
     <p>
-      Qanloom is a fast, open-source word processor with a familiar ribbon: styles, tables, track changes, references, mail merge, and .docx, PDF, ODT, RTF, HTML and Markdown files. It can be driven by AI agents over MCP.
+      Tavru Docs is a fast, open-source word processor with a familiar ribbon: styles, tables, track changes, references, mail merge, and .docx, PDF, ODT, RTF, HTML and Markdown files. It can be driven by AI agents over MCP.
     </p>
     <p>
-      Qanloom is based on WordCraft, the open-source word processor by the ArtCraft team and community.
+      Tavru Docs is based on WordCraft, the open-source word processor by the ArtCraft team and community.
     </p>
   </description>
   <launchable type="desktop-id">io.github.tomblanchard312.Nisaba.desktop</launchable>

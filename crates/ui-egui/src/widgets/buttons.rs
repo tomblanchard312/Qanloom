@@ -44,9 +44,14 @@ pub(crate) fn bg(ui: &Ui, r: Rect, resp: &Response, checked: bool, t: &Tokens) {
     } else {
         return;
     };
-    ui.painter().rect_filled(r, CornerRadius::same(4), fill);
+    ui.painter().rect_filled(r, CornerRadius::same(crate::theme::CONTROL_RADIUS), fill);
     if checked {
-        ui.painter().rect_stroke(r, CornerRadius::same(4), Stroke::new(1.0, t.accent.linear_multiply(0.5)), egui::StrokeKind::Inside);
+        ui.painter().rect_stroke(
+            r,
+            CornerRadius::same(crate::theme::CONTROL_RADIUS),
+            Stroke::new(1.0, t.accent.linear_multiply(0.5)),
+            egui::StrokeKind::Inside,
+        );
     }
 }
 

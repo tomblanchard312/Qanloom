@@ -9,7 +9,7 @@
 use std::borrow::Cow;
 
 /// The product name shown to people.
-pub const NAME: &str = "Qanloom";
+pub const NAME: &str = "Tavru Docs";
 /// Reverse-DNS application id: desktop file, icon name, window class, Flatpak id.
 pub const APP_ID: &str = "io.github.tomblanchard312.Nisaba";
 /// The executable name packages install.
@@ -21,13 +21,13 @@ pub const SETTINGS_DIR: &str = "Nisaba";
 /// Where people find the project.
 pub const HOMEPAGE: &str = "https://github.com/tomblanchard312/Qanloom";
 /// The project Qanloom is based on, stated wherever its origin is.
-/// The writing assistant's name, as a macro so `concat!` can build command labels from it.
+/// The writing assistant's functional action label, as a macro so `concat!` can build command labels from it.
 /// Users only ever see this name: the local model service behind it (SharedAI) stays out of the
 /// interface.
 #[macro_export]
 macro_rules! assistant_name {
     () => {
-        "Enki"
+        "Ask"
     };
 }
 /// The writing assistant's name (see [`assistant_name!`]).
@@ -51,9 +51,10 @@ mod tests {
 
     #[test]
     fn branding_replaces_only_the_product_name() {
-        assert_eq!(branded("Show the Start screen when WordCraft starts"), "Show the Start screen when Qanloom starts");
-        assert_eq!(branded("WordCraft User"), "Qanloom User");
+        assert_eq!(branded("Show the Start screen when WordCraft starts"), "Show the Start screen when Tavru Docs starts");
+        assert_eq!(branded("WordCraft User"), "Tavru Docs User");
         assert!(matches!(branded("Save As"), Cow::Borrowed("Save As")));
+        assert_eq!(ASSISTANT_NAME, "Ask");
         assert!(APP_ID.split('.').count() >= 3 && !APP_ID.contains("storyteller"));
         assert!(COPYRIGHT.contains("ArtCraft Team and the WordCraft contributors"), "the upstream notice stays");
     }

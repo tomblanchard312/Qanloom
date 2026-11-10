@@ -301,7 +301,10 @@ Eridu icon supplement (ribbon)
 Copyright (c) Eridu OS project. The supplement is under the MIT License
 printed above.
 
-Enki branding
+Assistant branding
 
-Copyright 2026 tomblanchard312 and contributors. The embedded Enki mark was
-created for Enki and is licensed under Apache License 2.0. See LICENSE-APACHE.
+The canonical Oqelith assistant mark is sourced from the TavruOS project.
+Source export SHA-256: 04dec495f340f0ab7b2bd5220575c12939544c02e30a10bb7a2e35b3132979fd.
+Concept approval does not establish production trademark or copyright clearance.
+See ATTRIBUTION.md. The earlier Enki artwork is no longer embedded; the runtime
+and SDK licensing notices above remain applicable to their respective components.

@@ -9,7 +9,7 @@ description = "WordCraft egui front end (Word-style ribbon UI); swappable: nothi
 workspace = true
 
 [dependencies]
-eridu-style = { git = "https://github.com/tomblanchard312/eridu-style", rev = "d3b4cdc03706ac100fae2de907282575652b76ad", default-features = false }
+eridu-style = { git = "https://github.com/tomblanchard312/tavru-style", rev = "ca9c970bf1474644b6b65da8ad47aec3677605b6", default-features = false }
 base64.workspace = true
 wordcraft-brand.workspace = true
 wordcraft-sharedai.workspace = true

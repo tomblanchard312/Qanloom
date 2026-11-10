@@ -8,9 +8,10 @@ use std::{
 };
 
 fn supported(version: &str) -> bool {
-    let Some(version) = version.trim().strip_prefix("ninimma ") else { return false };
+    let mut lines = version.trim().lines();
+    let Some(version) = lines.next().and_then(|line| line.strip_prefix("ninimma ")) else { return false };
     let parts: Vec<_> = version.split('.').map(str::parse::<u32>).collect();
-    matches!(parts.as_slice(), [Ok(major), Ok(minor), Ok(patch)] if (*major,*minor,*patch) >= (0,1,4))
+    matches!(parts.as_slice(), [Ok(_), Ok(_), Ok(_)]) && lines.any(|line| line == "file-dialog-protocol 1")
 }
 fn executable() -> Option<PathBuf> {
     let name = if cfg!(windows) { "ninimma.exe" } else { "ninimma" };
@@ -59,6 +60,11 @@ pub(super) fn pick(request: &FileDialogRequest) -> Option<Vec<String>> {
         return None;
     }
     let executable = executable()?;
+    pick_at(&executable, request)
+}
+
+fn pick_at(executable: &Path, request: &FileDialogRequest) -> Option<Vec<String>> {
+    // A version number alone never promised that --file-dialog was implemented.
     if !supported(std::str::from_utf8(&output(&executable, &["--version"], true)?).ok()?) {
         return None;
     }
@@ -87,7 +93,10 @@ mod tests {
     #[test]
     fn rejects_old_versions_and_invalid_selections() {
         assert!(!supported("ninimma 0.1.3"));
-        assert!(supported("ninimma 0.1.4\n"));
+        assert!(!supported("ninimma 0.1.4\n"));
+        assert!(!supported("ninimma 99.0.0\n"));
+        assert!(supported("ninimma 0.1.9\nfile-dialog-protocol 1\n"));
+        assert!(!supported("ninimma 0.1.9\nfile-dialog-protocol 2\n"));
         assert!(!supported("other 9.0.0"));
         let request = FileDialogRequest::Open { purpose: "model".into() };
         assert!(valid(&[], &request));
@@ -110,5 +119,23 @@ mod process_tests {
         assert_eq!(output(command, &["-c", "printf '[]'"], false).unwrap(), b"[]");
         assert!(output(command, &["-c", "exit 1"], false).is_none());
         assert!(output(command, &["-c", "head -c 65537 /dev/zero"], false).is_none());
+    }
+
+    #[test]
+    fn unadvertised_picker_is_not_launched_and_advertised_cancel_is_final() {
+        use std::os::unix::fs::PermissionsExt;
+        let directory = std::env::temp_dir().join(format!("qanloom-picker-protocol-{}", std::process::id()));
+        std::fs::create_dir(&directory).unwrap();
+        std::fs::set_permissions(&directory, std::fs::Permissions::from_mode(0o700)).unwrap();
+        let program = directory.join("ninimma");
+        let marker = directory.join("unexpected-dialog");
+        let request = FileDialogRequest::Open { purpose: "model".into() };
+        for (advertisement, expected) in [("", None), ("file-dialog-protocol 1\\n", Some(Vec::<String>::new()))] {
+            std::fs::write(&program, format!("#!/bin/sh\nif [ \"$1\" = --version ]; then\n printf 'ninimma 99.0.0\\n{advertisement}'\nelse\n touch \"$(dirname \"$0\")/unexpected-dialog\"\n printf '[]'\nfi\n")).unwrap();
+            std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o700)).unwrap();
+            assert_eq!(pick_at(&program, &request), expected);
+            assert_eq!(marker.exists(), expected.is_some());
+        }
+        std::fs::remove_dir_all(directory).unwrap();
     }
 }
