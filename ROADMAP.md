@@ -1,5 +1,7 @@
 # WordCraft roadmap
 
+> **Tavru workspace geometry (2026-11-10)** · The shared provider is pinned to 97efe362bb37da690f58bc953fba03d4b9ba2c21. App theme overrides now use 16px window and 12px menu/control roles, including open controls, while preserving pages, ribbon density, automatic theme behavior, shadows, data formats and runtime identities. Focused theme checks and real software-rendered light/dark Font-dialog captures are recorded separately from VM/package acceptance.
+
 > **Eridu UI update (2026-11-05)** · Qanloom adopts shared Eridu light and dark colors, typography and spacing in the editor and File workspace. The File sidebar and ribbon commands use Phosphor and the Eridu supplement. The writing assistant is now Enki, with the official mark and Eridu chat controls. The ribbon remains the primary editing toolbar. Full Eridu accessibility and platform acceptance remain open.
 
 > **Scribe navigation: 2026-10-30** · The branded Scribe button is always available in the top bar, independent of the selected ribbon tab. The Review shortcut is removed; existing assistant behavior is unchanged.

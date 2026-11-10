@@ -1,5 +1,7 @@
 # UI parity with Microsoft Word
 
+> **Tavru workspace geometry (2026-11-10)** · The shared provider is pinned to 97efe362bb37da690f58bc953fba03d4b9ba2c21. App theme overrides now use 16px window and 12px menu/control roles, including open controls, while preserving pages, ribbon density, automatic theme behavior, shadows, data formats and runtime identities. Focused theme checks and real software-rendered light/dark Font-dialog captures are recorded separately from VM/package acceptance.
+
 > **Eridu UI update (2026-11-05)** · Qanloom adopts shared Eridu light and dark colors, typography and spacing in the editor and File workspace. The File sidebar and ribbon commands use Phosphor and the Eridu supplement. The writing assistant is now Enki, with the official mark and Eridu chat controls. The ribbon remains the primary editing toolbar. File page headings use Inter Semibold at the Eridu page-title size to respect the repository rule on Adobe assets. Full Eridu accessibility and platform acceptance remain open.
 
 > **Runtime integration: 2026-10-30** · Native packages and local installs must retain the complete VBA runtime/compiler and its notices. Portable script packages are checked for required dependencies; Linux system packages declare their scripting dependencies. Native Linux smoke checks are separate from foreign-platform packaging checks. See [runtime packaging](scripting-runtimes.md).
