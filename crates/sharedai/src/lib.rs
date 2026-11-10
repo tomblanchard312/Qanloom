@@ -673,6 +673,6 @@ pub fn chat_auto(task: &str, messages: &[Message], params: &Params, cancel: &Ato
     ensure_running(&endpoint, Some(&endpoint))?;
     let models = list_models(&endpoint, "nisaba")?;
     let model = select_text_model(&models, task)
-        .ok_or_else(|| Error::Invalid("The local assistant is not ready. Configure text generation in Enki and retry.".into()))?;
+        .ok_or_else(|| Error::Invalid("The local assistant is not ready. Configure text generation in the assistant settings and retry.".into()))?;
     chat(&endpoint, "nisaba", &model, messages, params, Timeouts::default(), cancel, on_chunk)
 }

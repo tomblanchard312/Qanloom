@@ -1,5 +1,9 @@
 # WordCraft roadmap
 
+> **TavruOS visual update (2026-11-09)** · Shared purple workspace tokens, rounded chrome and scrollable File navigation adopted. [Design brief](docs/TAVRUOS-UI.md) records scope and remaining native accessibility acceptance.
+
+> **Portal reliability update (2026-11-08)** · Optional Ninimma picking requires an explicit protocol advertisement; immediate native cancellation is final. See [phase 0 portal scope and remaining gates](docs/PHASE0-PORTALS.md). Native release acceptance and readiness estimates remain unchanged.
+
 > **Eridu UI update (2026-11-05)** · Qanloom adopts shared Eridu light and dark colors, typography and spacing in the editor and File workspace. The File sidebar and ribbon commands use Phosphor and the Eridu supplement. The writing assistant is now Enki, with the official mark and Eridu chat controls. The ribbon remains the primary editing toolbar. Full Eridu accessibility and platform acceptance remain open.
 
 > **Scribe navigation: 2026-10-30** · The branded Scribe button is always available in the top bar, independent of the selected ribbon tab. The Review shortcut is removed; existing assistant behavior is unchanged.

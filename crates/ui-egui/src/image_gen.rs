@@ -237,14 +237,14 @@ fn fields(app: &mut WordApp, ui: &mut egui::Ui) {
             let label = ui.label(tl!("Steps"));
             ui.add(egui::TextEdit::singleline(&mut app.image_gen.steps).desired_width(48.0)).labelled_by(label.id);
         });
-        ui.label(tl!("Enki chooses the image engine and sampling settings for the selected processor."));
+        ui.label(tl!("The assistant chooses the image engine and sampling settings for the selected processor."));
     }
 }
 
 fn model_row(app: &mut WordApp, ui: &mut egui::Ui, busy: bool) {
     #[cfg(not(target_arch = "wasm32"))]
     let previous = app.image_gen.model.clone();
-    ui.label(tl!("Enki selects image generation behind the scenes."));
+    ui.label(tl!("The assistant selects image generation behind the scenes."));
     #[cfg(not(target_arch = "wasm32"))]
     if !app.image_gen.model.is_empty()
         && !sharedai_client::image_model_present(app.image_gen.model.trim())
@@ -264,7 +264,7 @@ fn model_row(app: &mut WordApp, ui: &mut egui::Ui, busy: bool) {
                     app.image_gen.model.clear();
                     refresh_for(app, Some(false));
                 }
-                if ui.button("Use Enki default").clicked() {
+                if ui.button("Use default settings").clicked() {
                     app.image_gen.model.clear();
                     refresh(app);
                 }
@@ -291,7 +291,7 @@ fn generate(app: &mut WordApp) {
         let (tx, rx) = mpsc::channel();
         app.image_gen.rx = Some(rx);
         app.image_gen.meter = None;
-        app.image_gen.status = "Waiting for Enki / loading the image model…".into();
+        app.image_gen.status = "Preparing image generation…".into();
         app.image_gen.started = Some(std::time::Instant::now());
         let cancel = sharedai_client::Cancellation::new();
         app.image_gen.cancel = Some(cancel.clone());
@@ -444,7 +444,7 @@ fn refresh_for(app: &mut WordApp, cpu: Option<bool>) {
                     let _ = tx.send(Outcome::Default { model: profile.model, side: profile.side, steps: profile.steps });
                 }
                 Err(error) => {
-                    let _ = tx.send(Outcome::Models(Err(format!("Update or start Enki to choose an image default: {error}"))));
+                    let _ = tx.send(Outcome::Models(Err(format!("Update or start the assistant to choose an image default: {error}"))));
                     return;
                 }
             }
@@ -467,7 +467,7 @@ fn apply(app: &mut WordApp, outcome: Outcome) {
                 app.image_gen.model = first.clone();
             }
             app.image_gen.status = if app.image_gen.models.is_empty() {
-                "Image generation needs setup. Use Set up image generation or configure it in Enki.".into()
+                "Image generation needs setup. Use Set up image generation or configure it in the assistant settings.".into()
             } else {
                 String::new()
             };
@@ -574,7 +574,7 @@ fn start_download(app: &mut WordApp) {
                 message: if report.registered {
                     "Image generation is ready.".into()
                 } else {
-                    "Image generation setup is incomplete. Check Enki and retry.".into()
+                    "Image generation setup is incomplete. Check the assistant settings and retry.".into()
                 },
             },
             Err(e) => Outcome::Downloaded { registered: false, message: e.to_string() },
@@ -695,11 +695,11 @@ fn fit_png(bytes: &[u8], left: u32, right: u32, top: u32, bottom: u32) -> Result
 /// Image warming is owned by the daemon; retained for existing desktop entry points.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn warm_default_image_model() {
-    // Start Enki as before; only the daemon chooses and warms the resident image default.
+    // Start the assistant as before; only the daemon chooses and warms the resident image default.
     let _ = std::thread::Builder::new().name("enki-start".into()).spawn(|| {
         let result = wordcraft_sharedai::endpoint("").and_then(|endpoint| wordcraft_sharedai::ensure_running(&endpoint, Some(&endpoint)));
         if let Err(error) = result {
-            log::warn!("Enki could not be started: {error}");
+            log::warn!("The assistant could not be started: {error}");
         }
     });
 }
@@ -749,7 +749,7 @@ mod image_progress_tests {
     }
 
     #[test]
-    #[ignore = "requires the installed Enki daemon and a suitable image GPU"]
+    #[ignore = "requires the installed local assistant daemon and a suitable image GPU"]
     fn installed_daemon_defaults_arrive_through_both_buttons() {
         let mut app = WordApp::new(wordcraft_engine::Session::new(wordcraft_doc::Document::new()), crate::Services::default());
         app.image_gen.open = true;

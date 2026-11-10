@@ -1,7 +1,7 @@
-//! Title bar › Enki ([`wordcraft_brand::ASSISTANT_NAME`]): writing suggestions from a model that
+//! Title bar › Ask ([`wordcraft_brand::ASSISTANT_NAME`]): writing suggestions from a model that
 //! runs on this computer.
 //!
-//! GGUF requests run through the installed Enki daemon. Replies stream into the pane;
+//! GGUF requests run through the installed local assistant daemon. Replies stream into the pane;
 //! accepted suggestions become tracked changes through `assistant.apply`.
 
 use std::path::{Path, PathBuf};
@@ -10,12 +10,12 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, TryRecvError};
 
 use egui::Ui;
-use eridu_style::{radius, size, space};
+use eridu_style::{size, space};
 use serde_json::{Value, json};
 
 use crate::WordApp;
 use crate::theme::{Tokens, regular, semibold};
-use wordcraft_brand::ASSISTANT_NAME as NAME;
+const NAME: &str = "The assistant";
 
 /// What the writer asks for. `None` is the free-form prompt.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -288,8 +288,8 @@ pub fn friendly(e: &wordcraft_sharedai::Error) -> String {
         E::Registry(_) => tl!("That model couldn't be added.").to_string(),
         E::Inference { kind, .. } => match kind.as_str() {
             "context_overflow" => f(tl!("That's more text than {name} can read at once. Select less.")),
-            "model_not_found" | "model_rejected" => f(tl!("{name} needs attention. Open Enki to check text generation, then retry.")),
-            "load_failed" => f(tl!("{name} couldn't start. Free some memory or check Enki, then retry.")),
+            "model_not_found" | "model_rejected" => f(tl!("{name} needs attention. Check text generation in the assistant settings, then retry.")),
+            "load_failed" => f(tl!("{name} couldn't start. Free some memory or check the assistant settings, then retry.")),
             "worker_crashed" => f(tl!("{name} stopped unexpectedly. Try again.")),
             _ => f(tl!("{name} ran into a problem. Try again.")),
         },
@@ -435,7 +435,7 @@ fn continue_context(app: &WordApp) -> String {
 
 fn ask(app: &mut WordApp, action: Option<Action>) -> Result<Value, String> {
     if app.assistant.job.is_some() {
-        return Err(tl!("Enki is busy. Stop the current request first.").into());
+        return Err(tl!("The assistant is busy. Stop the current request first.").into());
     }
     let selected = app.session.selected_text();
     let text = if selected.trim().is_empty() && action == Some(Action::Continue) { continue_context(app) } else { selected.clone() };
@@ -446,7 +446,7 @@ fn ask(app: &mut WordApp, action: Option<Action>) -> Result<Value, String> {
         return Err(tl!("That selection is too long. Select a smaller passage; nothing has been sent.").into());
     }
     if action.is_none() && app.assistant.prompt.trim().is_empty() {
-        return Err(tl!("Describe what you would like Enki to write.").into());
+        return Err(tl!("Describe what you would like the assistant to write.").into());
     }
     if app.assistant.prompt.chars().count() > 4000 {
         return Err(tl!("Shorten the request to 4000 characters.").into());
@@ -633,7 +633,7 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
             return;
         }
         Some(Work::Starting) => {
-            working_label(ui, &crate::i18n::fmt(tl!("Starting {name}…"), &[("name", NAME)]));
+            working_label(ui, tl!("Starting the assistant…"));
             return;
         }
         Some(Work::Adding) => {
@@ -655,7 +655,7 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
     }
 
     if app.assistant.listed && app.assistant.models.is_empty() {
-        ui.label(tl!("The local assistant is not ready. Open Enki to set up text generation."));
+        ui.label(tl!("The local assistant is not ready. Set up text generation in the assistant settings."));
         if ui.button(tl!("Retry")).clicked() {
             refresh_models(app);
         }
@@ -663,7 +663,7 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
     }
 
     if !app.assistant.listed && !busy {
-        working_label(ui, tl!("Checking local Enki availability…"));
+        working_label(ui, tl!("Checking local assistant availability…"));
         return;
     }
 
@@ -678,9 +678,12 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
         }
     });
     ui.add_space(space::SM);
-    egui::Frame::new().fill(t.panel).stroke(egui::Stroke::new(1.0, t.border)).corner_radius(radius::MEDIUM).inner_margin(space::MD as i8).show(
-        ui,
-        |ui| {
+    egui::Frame::new()
+        .fill(t.panel)
+        .stroke(egui::Stroke::new(1.0, t.border))
+        .corner_radius(crate::theme::CHROME_RADIUS)
+        .inner_margin(space::MD as i8)
+        .show(ui, |ui| {
             let label = ui.label(egui::RichText::new(tl!("Message")).font(semibold(size::LABEL)));
             let r = ui
                 .add(
@@ -697,7 +700,7 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
                 let can_send = !busy && !app.assistant.prompt.trim().is_empty();
                 let send = egui::Button::new(egui::RichText::new(tl!("Send")).color(t.on_primary))
                     .fill(t.primary)
-                    .corner_radius(radius::SMALL)
+                    .corner_radius(crate::theme::CONTROL_RADIUS)
                     .min_size(egui::vec2(2.0 * space::XXL, space::XXL));
                 if ui.add_enabled(can_send, send).clicked() || (enter && can_send) {
                     picked = Some(None);
@@ -706,8 +709,7 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
                     app.assistant.stop();
                 }
             });
-        },
-    );
+        });
     if let Some(action) = picked
         && let Err(error) = ask(app, action)
     {
@@ -725,15 +727,17 @@ pub fn pane(app: &mut WordApp, ui: &mut Ui) {
     if !app.assistant.reply.is_empty() {
         ui.add_space(space::MD);
         ui.label(egui::RichText::new(tl!("Suggestion")).font(semibold(size::LABEL)));
-        egui::Frame::new().fill(t.panel).stroke(egui::Stroke::new(1.0, t.border)).corner_radius(radius::MEDIUM).inner_margin(space::MD as i8).show(
-            ui,
-            |ui| {
+        egui::Frame::new()
+            .fill(t.panel)
+            .stroke(egui::Stroke::new(1.0, t.border))
+            .corner_radius(crate::theme::CHROME_RADIUS)
+            .inner_margin(space::MD as i8)
+            .show(ui, |ui| {
                 egui::ScrollArea::vertical().max_height((ui.available_height() - 100.0).max(60.0)).stick_to_bottom(true).show(ui, |ui| {
                     ui.set_min_width(ui.available_width());
                     ui.label(egui::RichText::new(app.assistant.reply.as_str()).font(regular(size::BODY)));
                 });
-            },
-        );
+            });
         if !app.assistant.busy() {
             let (had_text, mode) = app.assistant.origin.as_ref().map(|o| (o.had_text, o.mode)).unwrap_or((false, "after"));
             let current = app.assistant.origin.as_ref().is_some_and(|o| o.doc == (app.session.document_id(), app.session.rev()));
@@ -787,7 +791,7 @@ mod tests {
         assert_eq!(crate::i18n::pseudo::unmarked(&text).trim(), "", "{text}");
     }
     #[test]
-    fn enki_labels_the_composer_and_keeps_model_selection_in_settings() {
+    fn ask_labels_the_composer_and_keeps_model_selection_in_settings() {
         use egui_kittest::kittest::Queryable;
         let mut app = app("test");
         app.assistant.asked_models = true;

@@ -1633,7 +1633,7 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "eridu-style"
 version = "0.1.0"
-source = "git+https://github.com/tomblanchard312/eridu-style?rev=d3b4cdc03706ac100fae2de907282575652b76ad#d3b4cdc03706ac100fae2de907282575652b76ad"
+source = "git+https://github.com/tomblanchard312/tavru-style?rev=ca9c970bf1474644b6b65da8ad47aec3677605b6#ca9c970bf1474644b6b65da8ad47aec3677605b6"
 dependencies = [
  "egui",
 ]

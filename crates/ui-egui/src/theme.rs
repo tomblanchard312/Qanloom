@@ -6,6 +6,10 @@ use egui::{Align2, Color32, CornerRadius, FontData, FontDefinitions, FontFamily,
 
 use eridu_style::{size, space};
 
+/// TavruOS purple workspace geometry; document pages retain their exact corners.
+pub const CONTROL_RADIUS: u8 = 10;
+pub const CHROME_RADIUS: u8 = 16;
+
 /// The interface theme setting (File › Options › General, View › Interface Theme): a fixed light or
 /// dark palette, or `System`, which follows the OS light/dark appearance live (#115). Dark page
 /// (View › Switch Modes) is separate: it changes how pages are drawn, never the interface (#312).
@@ -45,12 +49,12 @@ impl Appearance {
     }
 
     /// Whether the interface is dark, given the OS appearance egui reports (`Context::system_theme`).
-    /// `System` falls back to light when the OS reports none.
+    /// `System` falls back to dark when the OS reports none.
     pub fn is_dark(self, system: Option<egui::Theme>) -> bool {
         match self {
             Appearance::Light => false,
             Appearance::Dark => true,
-            Appearance::System => system == Some(egui::Theme::Dark),
+            Appearance::System => system != Some(egui::Theme::Light),
         }
     }
 
@@ -312,7 +316,7 @@ impl Tokens {
             canvas: eridu.surface_subtle,
             panel: eridu.surface,
             border: eridu.border,
-            border_strong: eridu.border,
+            border_strong: eridu.focus,
             text: eridu.text,
             text_dim: eridu.text_muted,
             text_disabled: Color32::from_rgb(0xA8, 0xA8, 0xA8),
@@ -328,7 +332,7 @@ impl Tokens {
             accent_text: eridu.accent,
             on_accent: eridu.accent_text,
             input: eridu.surface,
-            input_border: Color32::from_gray(0x84),
+            input_border: eridu.border,
             group_label: eridu.text_muted,
             ruler: Color32::from_rgb(0xFF, 0xFF, 0xFF),
             ruler_margin: Color32::from_rgb(0xD4, 0xD4, 0xD4),
@@ -381,7 +385,7 @@ impl Tokens {
             canvas: eridu.background,
             panel: eridu.surface,
             border: eridu.border,
-            border_strong: eridu.border,
+            border_strong: eridu.focus,
             text: eridu.text,
             text_dim: eridu.text_muted,
             text_disabled: Color32::from_rgb(0x6A, 0x6A, 0x6A),
@@ -397,7 +401,7 @@ impl Tokens {
             accent_text: eridu.accent,
             on_accent: eridu.accent_text,
             input: eridu.surface,
-            input_border: Color32::from_gray(0x84),
+            input_border: eridu.border,
             group_label: eridu.text_muted,
             // The text area is lighter than the margins, as in the light theme (#1148).
             ruler: Color32::from_rgb(0x45, 0x45, 0x45),
@@ -804,7 +808,7 @@ pub fn apply(ctx: &egui::Context, appearance: Appearance) {
         s.interaction.tooltip_delay = 0.45;
     });
     ctx.options_mut(|o| {
-        o.fallback_theme = egui::Theme::Light;
+        o.fallback_theme = egui::Theme::Dark;
         o.theme_preference = appearance.preference();
     });
 }
@@ -828,8 +832,8 @@ fn visuals(t: &Tokens) -> Visuals {
     v.extreme_bg_color = t.input;
     v.faint_bg_color = t.panel;
     v.window_stroke = Stroke::new(1.0, t.border_strong);
-    v.window_corner_radius = CornerRadius::same(8);
-    v.menu_corner_radius = CornerRadius::same(6);
+    v.window_corner_radius = CornerRadius::same(CHROME_RADIUS);
+    v.menu_corner_radius = CornerRadius::same(CONTROL_RADIUS);
     v.selection.bg_fill = t.selection;
     v.selection.stroke = Stroke::new(1.0, t.accent);
     v.hyperlink_color = t.accent_text;
@@ -839,16 +843,16 @@ fn visuals(t: &Tokens) -> Visuals {
     v.widgets.inactive.weak_bg_fill = t.input;
     v.widgets.inactive.bg_stroke = Stroke::new(1.0, t.input_border);
     v.widgets.inactive.fg_stroke = Stroke::new(1.0, t.text);
-    v.widgets.inactive.corner_radius = CornerRadius::same(4);
+    v.widgets.inactive.corner_radius = CornerRadius::same(CONTROL_RADIUS);
     v.widgets.hovered.bg_fill = t.hover;
     v.widgets.hovered.weak_bg_fill = t.hover;
     v.widgets.hovered.bg_stroke = Stroke::new(1.0, t.border_strong);
     v.widgets.hovered.fg_stroke = Stroke::new(1.0, t.text);
-    v.widgets.hovered.corner_radius = CornerRadius::same(4);
+    v.widgets.hovered.corner_radius = CornerRadius::same(CONTROL_RADIUS);
     v.widgets.active.bg_fill = t.pressed;
     v.widgets.active.weak_bg_fill = t.pressed;
     v.widgets.active.fg_stroke = Stroke::new(1.0, t.text);
-    v.widgets.active.corner_radius = CornerRadius::same(4);
+    v.widgets.active.corner_radius = CornerRadius::same(CONTROL_RADIUS);
     v.widgets.open.bg_fill = t.pressed;
     v.widgets.open.weak_bg_fill = t.pressed;
     v.popup_shadow = egui::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(if t.dark { 120 } else { 40 }) };
@@ -875,6 +879,23 @@ mod tests {
         };
         let (x, y) = (lum(a), lum(b));
         (x.max(y) + 0.05) / (x.min(y) + 0.05)
+    }
+
+    #[test]
+    fn tavru_workspace_uses_shared_tokens_and_dark_fallback() {
+        for (t, shared) in [(super::Tokens::light(), eridu_style::LIGHT), (super::Tokens::dark(), eridu_style::DARK)] {
+            assert_eq!(t.primary, shared.primary);
+            assert_eq!(t.panel, shared.surface);
+            assert_eq!(t.input_border, shared.border);
+            let visuals = super::visuals(&t);
+            assert_eq!(visuals.widgets.inactive.corner_radius, egui::CornerRadius::same(super::CONTROL_RADIUS));
+            assert_eq!(visuals.menu_corner_radius, egui::CornerRadius::same(super::CONTROL_RADIUS));
+        }
+        let ctx = egui::Context::default();
+        super::apply(&ctx, super::Appearance::System);
+        assert_eq!(ctx.options(|o| o.fallback_theme), egui::Theme::Dark);
+        assert!(super::Appearance::System.is_dark(None));
+        assert!(!super::Appearance::System.is_dark(Some(egui::Theme::Light)));
     }
 
     /// #1885: the ✕ on a window's close box reads on its hover and pressed reds in both themes.
@@ -904,10 +925,9 @@ mod tests {
     #[test]
     fn the_file_sidebar_reads_in_both_themes() {
         for t in [super::Tokens::light(), super::Tokens::dark()] {
-            for alpha in [0, 26, 46] {
-                let bg = t.nav.blend(egui::Color32::from_white_alpha(alpha));
+            for bg in [t.nav, t.hover, t.checked] {
                 let r = contrast(t.on_nav, bg);
-                assert!(r >= 4.5, "dark={}: sidebar state alpha {alpha} is {r:.2}:1", t.dark);
+                assert!(r >= 4.5, "dark={}: sidebar state {bg:?} is {r:.2}:1", t.dark);
             }
         }
     }

@@ -8,7 +8,7 @@ Generated-in-code art is original and has no file to list: the UI icon set (`cra
 
 | Asset | Author | Source | Licence | Notes |
 |---|---|---|---|---|
-| `assets/icons/enki.png` | Enki contributors (AI-assisted) | https://github.com/tomblanchard312/Oqelith/blob/756dd71d451ca3dae52fea802f504804cf806aa9/assets/branding/enki-128.png | Apache-2.0 (NOTICE and LICENSE-APACHE) | Official folded blue E, embedded in the title bar and writing pane |
+| `assets/icons/oqelith.png` | TavruOS project | https://github.com/tomblanchard312/TavruOS/blob/fdb166f18ad35cc0c9586ca77cf407e84158d32e/branding/logo/oqelith/oqelith-mark-128.png | Original project artwork; concept approval only, production legal review pending | Canonical assistant mark, used without a wordmark; upstream export provenance retained |
 | `eridu-style` dependency: `fonts/InterTabular-Regular.ttf` | The Inter Project Authors; tabular figures enabled by eridu-style contributors | https://github.com/tomblanchard312/eridu-style/blob/d3b4cdc03706ac100fae2de907282575652b76ad/fonts/InterTabular-Regular.ttf | SIL OFL 1.1 (assets/fonts/OFL-Inter.txt) | Tabular zoom readout |
 | `eridu-style` dependency: `fonts/phosphor/Phosphor-Regular.ttf` | Phosphor Icons | https://github.com/tomblanchard312/eridu-style/blob/d3b4cdc03706ac100fae2de907282575652b76ad/fonts/phosphor/Phosphor-Regular.ttf | MIT (full notice in NOTICE) | File navigation icons |
 | `eridu-style` dependency: `fonts/phosphor/Phosphor-Fill.ttf` | Phosphor Icons | https://github.com/tomblanchard312/eridu-style/blob/d3b4cdc03706ac100fae2de907282575652b76ad/fonts/phosphor/Phosphor-Fill.ttf | MIT (full notice in NOTICE) | File navigation icons |

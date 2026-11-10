@@ -170,6 +170,7 @@ mod tests {
     fn the_drawn_i_beam_takes_the_canvas_colour_off_the_page() {
         let text = vec!["A line of text to fill the pages."; 120].join("\n");
         let mut h = window_at(true, true, 1.0, 800.0, &text);
+        h.state_mut().run("ui.theme", serde_json::json!({"value": "light"})).unwrap();
         h.state_mut().session.view.zoom = 0.5;
         h.run_steps(3);
         let canvas = crate::theme::Tokens::get(&h.ctx).canvas;

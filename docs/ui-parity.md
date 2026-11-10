@@ -1,5 +1,9 @@
 # UI parity with Microsoft Word
 
+> **TavruOS visual update (2026-11-09)** · Shared purple workspace tokens, rounded chrome and scrollable File navigation adopted. [Design brief](TAVRUOS-UI.md) records scope and remaining native accessibility acceptance.
+
+> **Portal reliability update (2026-11-08)** · Picker capability detection and cancellation semantics are hardened; [native portal failure and timeout gates remain open](PHASE0-PORTALS.md). No readiness percentage changes.
+
 > **Eridu UI update (2026-11-05)** · Qanloom adopts shared Eridu light and dark colors, typography and spacing in the editor and File workspace. The File sidebar and ribbon commands use Phosphor and the Eridu supplement. The writing assistant is now Enki, with the official mark and Eridu chat controls. The ribbon remains the primary editing toolbar. File page headings use Inter Semibold at the Eridu page-title size to respect the repository rule on Adobe assets. Full Eridu accessibility and platform acceptance remain open.
 
 > **Runtime integration: 2026-10-30** · Native packages and local installs must retain the complete VBA runtime/compiler and its notices. Portable script packages are checked for required dependencies; Linux system packages declare their scripting dependencies. Native Linux smoke checks are separate from foreign-platform packaging checks. See [runtime packaging](scripting-runtimes.md).

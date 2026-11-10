@@ -5403,12 +5403,12 @@ fn interface_size_survives_an_unusable_display_scale() {
     assert_eq!(InterfaceSize::AUTO.drawn_percent(f32::MAX), u16::MAX);
 }
 
-/// #115: System follows the OS appearance (light when unknown); the manual choices ignore it.
+/// #115: System follows the OS appearance (dark when unknown); the manual choices ignore it.
 #[test]
 fn interface_theme_resolves_against_the_os_appearance() {
     use egui::Theme::{Dark, Light};
     use theme::Appearance;
-    let cases = [(Appearance::System, None, false), (Appearance::System, Some(Light), false), (Appearance::System, Some(Dark), true)];
+    let cases = [(Appearance::System, None, true), (Appearance::System, Some(Light), false), (Appearance::System, Some(Dark), true)];
     for (setting, os, dark) in cases.into_iter().chain([(Appearance::Light, Some(Dark), false), (Appearance::Dark, Some(Light), true)]) {
         assert_eq!(setting.is_dark(os), dark, "{setting:?} with the OS at {os:?}");
     }
@@ -5682,7 +5682,7 @@ fn system_theme_follows_the_os_without_pinning_the_window() {
     let mut a = app();
     a.run("ui.theme", json!({"value": "system"})).unwrap();
     let mut sent = Vec::new();
-    for (os, dark) in [(Some(Theme::Light), false), (Some(Theme::Dark), true), (Some(Theme::Light), false), (None, false)] {
+    for (os, dark) in [(Some(Theme::Light), false), (Some(Theme::Dark), true), (Some(Theme::Light), false), (None, true)] {
         sent.extend(theme_frame(&ctx, &mut a, os));
         assert_eq!(ctx.options(|o| o.theme_preference), ThemePreference::System, "OS at {os:?}");
         let want = if dark { theme::Tokens::dark() } else { theme::Tokens::light() };
@@ -5724,7 +5724,7 @@ fn dark_page_leaves_the_interface_theme_alone() {
     use egui::Theme::{Dark, Light};
     for (setting, os, dark) in [
         ("system", Some(Light), false),
-        ("system", None, false),
+        ("system", None, true),
         ("light", Some(Dark), false),
         ("system", Some(Dark), true),
         ("dark", Some(Light), true),
