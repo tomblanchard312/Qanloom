@@ -65,7 +65,7 @@ pub(super) fn pick(request: &FileDialogRequest) -> Option<Vec<String>> {
 
 fn pick_at(executable: &Path, request: &FileDialogRequest) -> Option<Vec<String>> {
     // A version number alone never promised that --file-dialog was implemented.
-    if !supported(std::str::from_utf8(&output(&executable, &["--version"], true)?).ok()?) {
+    if !supported(std::str::from_utf8(&output(executable, &["--version"], true)?).ok()?) {
         return None;
     }
     let (save, multiple, name, directory, filters) = match request {
@@ -84,7 +84,7 @@ fn pick_at(executable: &Path, request: &FileDialogRequest) -> Option<Vec<String>
         }
     };
     let json = serde_json::json!({"version":1,"save":save,"multiple":multiple,"name":name,"directory":directory,"filters":filters}).to_string();
-    let paths: Vec<String> = serde_json::from_slice(&output(&executable, &["--file-dialog", &json], false)?).ok()?;
+    let paths: Vec<String> = serde_json::from_slice(&output(executable, &["--file-dialog", &json], false)?).ok()?;
     valid(&paths, request).then_some(paths)
 }
 #[cfg(test)]

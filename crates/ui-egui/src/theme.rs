@@ -4,11 +4,11 @@ use std::sync::Arc;
 
 use egui::{Align2, Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, Rect, Stroke, Visuals};
 
-use eridu_style::{size, space};
+use eridu_style::{radius, size, space};
 
 /// TavruOS purple workspace geometry; document pages retain their exact corners.
-pub const CONTROL_RADIUS: u8 = 10;
-pub const CHROME_RADIUS: u8 = 16;
+pub const CONTROL_RADIUS: u8 = radius::CONTROL;
+pub const CHROME_RADIUS: u8 = radius::SURFACE;
 
 /// The interface theme setting (File › Options › General, View › Interface Theme): a fixed light or
 /// dark palette, or `System`, which follows the OS light/dark appearance live (#115). Dark page
@@ -853,6 +853,7 @@ fn visuals(t: &Tokens) -> Visuals {
     v.widgets.active.weak_bg_fill = t.pressed;
     v.widgets.active.fg_stroke = Stroke::new(1.0, t.text);
     v.widgets.active.corner_radius = CornerRadius::same(CONTROL_RADIUS);
+    v.widgets.open.corner_radius = CornerRadius::same(CONTROL_RADIUS);
     v.widgets.open.bg_fill = t.pressed;
     v.widgets.open.weak_bg_fill = t.pressed;
     v.popup_shadow = egui::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(if t.dark { 120 } else { 40 }) };
@@ -889,6 +890,7 @@ mod tests {
             assert_eq!(t.input_border, shared.border);
             let visuals = super::visuals(&t);
             assert_eq!(visuals.widgets.inactive.corner_radius, egui::CornerRadius::same(super::CONTROL_RADIUS));
+            assert_eq!(visuals.widgets.open.corner_radius, egui::CornerRadius::same(super::CONTROL_RADIUS));
             assert_eq!(visuals.menu_corner_radius, egui::CornerRadius::same(super::CONTROL_RADIUS));
         }
         let ctx = egui::Context::default();
